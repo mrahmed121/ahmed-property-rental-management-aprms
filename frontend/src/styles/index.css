@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-charcoal-950 text-slate-200 font-sans antialiased;
+}
+
+/* Gold-focus inputs */
+.aprms-input {
+  @apply w-full rounded-lg bg-charcoal-900 border border-charcoal-700 px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/40;
+}
+
+.aprms-btn-gold {
+  @apply inline-flex items-center justify-center rounded-lg bg-gold px-4 py-2.5 text-sm font-semibold text-charcoal-950 transition hover:bg-gold-light disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.aprms-btn-ghost {
+  @apply inline-flex items-center justify-center rounded-lg border border-charcoal-700 bg-charcoal-900 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-gold/50 hover:text-gold;
+}
+
+.aprms-card {
+  @apply rounded-xl border border-charcoal-700/60 bg-charcoal-900/80 backdrop-blur p-5 shadow-[0_8px_30px_rgba(0,0,0,0.35)];
+}
+
+.aprms-label {
+  @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-400;
+}
+
+.aprms-error {
+  @apply mt-1 text-xs text-red-400;
+}
+
+/* Thin scrollbars for shell */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #2f3a49; border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
