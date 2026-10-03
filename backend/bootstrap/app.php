@@ -29,9 +29,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            // Let validation errors use Laravel's default 422 + errors shape.
+            // Validation failures are always 422 JSON on the API —
+            // never a redirect, even without an Accept header.
             if ($e instanceof \Illuminate\Validation\ValidationException) {
-                return null;
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'errors' => $e->errors(),
+                ], 422);
             }
 
             $status = $e instanceof HttpExceptionInterface

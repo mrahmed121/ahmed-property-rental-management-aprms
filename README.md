@@ -7,9 +7,9 @@ property managers: properties, leases, rent collection, deposits, maintenance,
 expenses, owner statements, and reports — with strict multi-agency isolation,
 role-based access, and a full audit trail.
 
-**Status: P1 Foundation — implemented and verified.**
-35 backend tests pass (130 assertions) · 5 frontend auth-flow tests pass.
-P2+ domain modules (Leasing, Billing, Maintenance, Reporting) are documented
+**Status: P2 Property domain — implemented and verified.**
+79 backend tests pass (323 assertions) · 14 frontend tests pass.
+P3+ domain modules (Leasing, Billing, Maintenance, Reporting) are documented
 contracts; their business logic lands in their own phases.
 
 ---
@@ -64,13 +64,24 @@ Password for all demo users: `password123`
 | GET/POST/PUT | `/api/v1/roles`, `/api/v1/permissions` | RBAC management |
 | GET/PUT | `/api/v1/settings` | Agency-scoped typed settings |
 | GET | `/api/v1/audit-logs` | Read-only audit trail |
+| GET | `/api/v1/dashboard/stats` | Real portfolio counts (properties, buildings, units, vacant/occupied) |
+| GET/POST | `/api/v1/properties` | List (search/filter/sort/paginate) / create |
+| GET/PUT/DELETE | `/api/v1/properties/{id}` | Detail / update / archive (cascades) |
+| POST | `/api/v1/properties/{id}/restore` | Restore with archived children |
+| GET/POST | `/api/v1/buildings` | List / create under a property |
+| GET/PUT/DELETE | `/api/v1/buildings/{id}` | Detail / update / archive |
+| GET/POST | `/api/v1/units` | List / create under a building |
+| GET/PUT/DELETE | `/api/v1/units/{id}` | Detail / update / archive |
+| GET/POST | `/api/v1/documents` | List / multipart upload (≤ 10 MB) |
+| GET | `/api/v1/documents/{id}/download` | Authenticated file stream |
+| DELETE | `/api/v1/documents/{id}` | Delete record + file |
 
 Full reference: [`docs/API.md`](docs/API.md) · Architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · Schema: [`docs/DATABASE.md`](docs/DATABASE.md)
 
 ## Testing
 ```bash
-cd backend && php artisan test     # 35 passed, 130 assertions
-cd frontend && npm test            # 5 passed (auth flow)
+cd backend && php artisan test     # 79 passed, 323 assertions
+cd frontend && npm test -- --run   # 14 passed (auth + property workflows)
 ```
 
 ## Security Notes

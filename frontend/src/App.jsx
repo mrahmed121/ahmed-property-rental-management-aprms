@@ -5,6 +5,9 @@ import AppShell from './components/common/AppShell';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import EmptyState from './components/common/EmptyState';
+import PropertiesPage from './modules/property/pages/PropertiesPage';
+import PropertyFormPage from './modules/property/pages/PropertyFormPage';
+import PropertyDetailPage from './modules/property/pages/PropertyDetailPage';
 
 function Placeholder({ title, hint }) {
   return (
@@ -26,7 +29,12 @@ export default function App() {
             }
           >
             <Route index element={<Dashboard />} />
-            {/* P1 admin placeholders — real modules land in P2+ */}
+            {/* P2 — Property domain */}
+            <Route path="properties" element={<PropertiesPage />} />
+            <Route path="properties/new" element={<PropertyFormPage />} />
+            <Route path="properties/:id" element={<PropertyDetailPage />} />
+            <Route path="properties/:id/edit" element={<PropertyFormPage />} />
+            {/* P1 admin placeholders — remaining modules land in P3+ */}
             <Route
               path="users"
               element={<Placeholder title="Users & Roles" hint="User administration UI arrives with the P2 build. API is live at /api/v1/users." />}

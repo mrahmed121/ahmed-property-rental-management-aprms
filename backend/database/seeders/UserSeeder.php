@@ -36,21 +36,20 @@ class UserSeeder extends Seeder
 
     private function makeAgencyUsers(Agency $agency, string $domain): void
     {
+        // [display name, email local part, role slug]
         $map = [
-            'Agency Admin' => 'admin',
-            'Property Manager' => 'manager',
-            'Accountant' => 'accountant',
-            'Maintenance Supervisor' => 'supervisor',
-            'Technician' => 'technician',
-            'Owner Demo' => 'owner',
-            'Tenant Demo' => 'tenant',
-            'Auditor Demo' => 'auditor',
+            ['Agency Admin', 'admin', 'agency-admin'],
+            ['Property Manager', 'manager', 'property-manager'],
+            ['Accountant', 'accountant', 'accountant'],
+            ['Maintenance Supervisor', 'supervisor', 'maintenance-supervisor'],
+            ['Technician', 'technician', 'technician'],
+            ['Owner Demo', 'owner', 'owner'],
+            ['Tenant Demo', 'tenant', 'tenant'],
+            ['Auditor Demo', 'auditor', 'auditor'],
         ];
 
-        foreach ($map as $name => $local) {
-            $this->makeUser($agency, $name, "{$local}@{$domain}", [
-                str($local === 'admin' ? 'agency-admin' : $local)->slug()->toString(),
-            ]);
+        foreach ($map as [$name, $local, $roleSlug]) {
+            $this->makeUser($agency, $name, "{$local}@{$domain}", [$roleSlug]);
         }
     }
 

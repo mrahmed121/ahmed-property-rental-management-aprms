@@ -5,7 +5,8 @@ import { useAuth } from '../../context/AuthContext';
  * Otherwise renders nothing (nav) or a forbidden notice (pages).
  */
 export default function PermissionGuard({ permission, children, showForbidden = false }) {
-  const { hasPermission } = useAuth();
+  const { hasPermission, loading } = useAuth();
+  if (loading) return null; // don't flash "restricted" before /me resolves
   if (hasPermission(permission)) return children;
   if (!showForbidden) return null;
   return (

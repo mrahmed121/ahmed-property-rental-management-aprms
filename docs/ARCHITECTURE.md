@@ -1,6 +1,6 @@
 # APRMS Architecture
 
-> Ahmed Property & Rental Management System — P1 Foundation.
+> Ahmed Property & Rental Management System — P1 Foundation + P2 Property domain.
 > This document describes what is ACTUALLY implemented. Future phases extend it.
 
 ## Stack (deliberate choice)
@@ -20,6 +20,10 @@ app/Domains/
 │   ├── Scopes/        AgencyScope (global query scope)
 │   ├── Services/      DomainService (base), AuditService, SettingService
 │   └── Repositories/  BaseRepository (query-boundary pattern)
+├── Property/                                    (P2 — implemented)
+│   ├── Models/        Property, Building, Unit, PropertyDocument
+│   └── Services/      PropertyService, BuildingService, UnitService,
+│                      DocumentService, PropertyAccess (portfolio scoping)
 ├── Leasing/Services/  LeaseService      (P3 contract)
 ├── Billing/Services/  RentCycleService, AllocationService,
 │                       DunningService, DepositService   (P4/P5 contracts)
@@ -36,8 +40,32 @@ middleware → FormRequest validation → thin controller → domain service →
 audited write → JSON response.
 
 API errors are JSON: 401 unauthenticated, 403 missing permission / cross-agency,
-422 validation (Laravel default `errors` shape), 404 for cross-agency lookups
-(existence is never leaked).
+422 validation (`{message, errors}` — always JSON on `/api/*`, never a redirect),
+404 for cross-agency lookups (existence is never leaked).
+
+## P2 — Property domain (implemented)
+- **Hierarchy:** Agency → Properties → Buildings → Units; documents attach
+  polymorphically to property/building/unit.
+- **Archive, not delete:** properties/buildings/units soft-delete with cascade;
+  documents are preserved. `POST …/restore` reverses the cascade (blocked when a
+  parent is still archived). No hard-delete endpoints.
+- **Portfolio scoping** (`PropertyAccess`): owners see only properties where
+  `owner_id` = themselves; tenants see none in P2 (P3 leases will link them);
+  portfolio roles see the whole agency. Applied in every property-domain service.
+- **Documents:** real multipart upload (PDF/JPG/PNG/WEBP/DOC/DOCX/TXT ≤ 10 MB),
+  stored under `storage/app/private/documents/{agency_id}/` (never web-accessible);
+  downloads stream through an authenticated endpoint that re-checks agency +
+  portfolio. No public URLs.
+- **Dashboard:** `GET /api/v1/dashboard/stats` returns real counts
+  (properties, buildings, units, vacant/occupied, units_by_status) —
+  agency- and portfolio-scoped. Frontend shows honest empty states at zero.
+- **Frontend:** `src/modules/property/` — Properties list (search/filter/sort/
+  pagination), create/edit form with inline validation, detail page with
+  Buildings/Units/Documents tabs, archive confirmations, permission-gated
+  actions, responsive layouts.
+- P2 audit actions: `properties.create/update/archive/restore`,
+  `buildings.create/update/archive/restore`, `units.create/update/archive/restore`,
+  `documents.upload/delete`.
 
 ## Multi-tenancy
 - Every agency-owned model uses `BelongsToAgency` → `AgencyScope` global scope.
@@ -51,6 +79,9 @@ API errors are JSON: 401 unauthenticated, 403 missing permission / cross-agency,
 accountant, maintenance-supervisor, technician, owner, tenant, auditor.
 Permissions are flat slugs (`users.manage`); the `permission` route middleware
 checks them; the frontend hides nav items via `PermissionGuard` / `hasPermission()`.
+P2 adds 8 property-domain permissions: `properties.view/manage`,
+`buildings.view/manage`, `units.view/manage`, `documents.view/manage` —
+auditor stays read-only, owner/tenant get scoped view rights only.
 
 ## Audit trail
 Append-only `audit_logs` (no `updated_at`). Single write path: `AuditService::log()`.

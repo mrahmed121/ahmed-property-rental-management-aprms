@@ -37,4 +37,24 @@ class Agency extends Model
     {
         return $this->hasMany(AuditLog::class);
     }
+
+    public function properties()
+    {
+        return $this->hasMany(\App\Domains\Property\Models\Property::class);
+    }
+
+    public function buildings()
+    {
+        return $this->hasMany(\App\Domains\Property\Models\Building::class);
+    }
+
+    public function units()
+    {
+        return $this->hasMany(\App\Domains\Property\Models\Unit::class);
+    }
+
+    public function propertyDocuments()
+    {
+        return $this->hasMany(\App\Domains\Property\Models\PropertyDocument::class);
+    }
 }

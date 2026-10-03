@@ -1,12 +1,16 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-// P1 navigation. Each item declares the permission that reveals it.
-// Future modules (P2+) append their items here with their own permissions.
+// P1 navigation + P2 property module. Each item declares the permission that reveals it.
+// Future modules (P3+) append their items here with their own permissions.
 const NAV_GROUPS = [
   {
     label: 'Overview',
     items: [{ to: '/', label: 'Dashboard', icon: '◈', permission: 'dashboard.view' }],
+  },
+  {
+    label: 'Portfolio',
+    items: [{ to: '/properties', label: 'Properties', icon: '🏘️', permission: 'properties.view' }],
   },
   {
     label: 'Administration',
