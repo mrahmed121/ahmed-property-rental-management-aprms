@@ -2,6 +2,12 @@
 
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\DunningController;
+use App\Http\Controllers\Api\V1\FinancialController;
+use App\Http\Controllers\Api\V1\InvoiceController;
+use App\Http\Controllers\Api\V1\LedgerController;
+use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\ReceiptController;
 use App\Http\Controllers\Api\V1\BuildingController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DocumentController;
@@ -114,5 +120,36 @@ Route::prefix('v1')->group(function () {
         Route::get('inspections/{inspection}', [InspectionController::class, 'show'])->middleware('permission:inspections.view');
         Route::put('inspections/{inspection}', [InspectionController::class, 'update'])->middleware('permission:inspections.manage');
         Route::post('inspections/{inspection}/review', [InspectionController::class, 'review'])->middleware('permission:inspections.manage');
+
+        // P4 — Billing / money-in domain
+        Route::get('invoices', [InvoiceController::class, 'index'])->middleware('permission:invoices.view');
+        Route::post('invoices', [InvoiceController::class, 'store'])->middleware('permission:invoices.generate');
+        Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->middleware('permission:invoices.view');
+        Route::post('invoices/{invoice}/void', [InvoiceController::class, 'void'])->middleware('permission:invoices.generate');
+        Route::post('rent-cycle/generate', [InvoiceController::class, 'generateCycle'])->middleware('permission:invoices.generate');
+        Route::post('late-fees/accrue', [InvoiceController::class, 'accrueLateFees'])->middleware('permission:billing.adjust');
+        Route::post('late-fees/{lateFee}/waive', [InvoiceController::class, 'waiveLateFee'])->middleware('permission:billing.adjust');
+
+        Route::get('payments', [PaymentController::class, 'index'])->middleware('permission:payments.view');
+        Route::post('payments/preview', [PaymentController::class, 'preview'])->middleware('permission:payments.record');
+        Route::post('payments', [PaymentController::class, 'store'])->middleware('permission:payments.record');
+        Route::get('payments/{payment}', [PaymentController::class, 'show'])->middleware('permission:payments.view');
+        Route::post('payments/{payment}/reverse', [PaymentController::class, 'reverse'])->middleware('permission:payments.reverse');
+
+        Route::get('tenants/{tenant}/ledger', [LedgerController::class, 'show'])->middleware('permission:ledger.view');
+        Route::get('tenants/{tenant}/ledger/balance', [LedgerController::class, 'balance'])->middleware('permission:ledger.view');
+
+        Route::get('dunning', [DunningController::class, 'index'])->middleware('permission:dunning.view');
+        Route::post('dunning/process', [DunningController::class, 'process'])->middleware('permission:dunning.manage');
+        Route::post('dunning/{reminder}/sent', [DunningController::class, 'markSent'])->middleware('permission:dunning.manage');
+
+        Route::get('payments/{payment}/receipt', [ReceiptController::class, 'show'])->middleware('permission:receipts.view');
+        Route::get('payments/{payment}/receipt/pdf', [ReceiptController::class, 'pdf'])->middleware('permission:receipts.view');
+
+        Route::get('financial/dashboard', [FinancialController::class, 'dashboard'])->middleware('permission:billing.view');
+        Route::get('financial/arrears', [FinancialController::class, 'arrears'])->middleware('permission:billing.view');
+        Route::get('financial/periods', [FinancialController::class, 'periods'])->middleware('permission:billing.view');
+        Route::post('financial/periods/lock', [FinancialController::class, 'lockPeriod'])->middleware('permission:periods.manage');
+        Route::post('financial/periods/unlock', [FinancialController::class, 'unlockPeriod'])->middleware('permission:periods.manage');
     });
 });

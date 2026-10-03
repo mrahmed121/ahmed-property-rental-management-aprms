@@ -92,3 +92,46 @@ Leasing scoping (P3): tenants see only their own tenant record, applications, le
 - `POST` → `201` with `{message, data}`; `PUT` → `200`; `DELETE` → `200` with message.
 - Pagination: `{data, meta: {current_page, per_page, total}}`.
 - Tokens: JWT (tymon/jwt-auth), TTL 120 min (configurable via `JWT_TTL`).
+
+## P4 — Billing / money-in
+
+All financial amounts are in PKR (₨). Every number is database-backed.
+
+### Invoices
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|------------|-------------|
+| GET | `/invoices` | `invoices.view` | List (filters: tenant, lease, unit, property, status, overdue, date/amount range, search) |
+| POST | `/invoices` | `invoices.generate` | Create for a lease period (idempotent on lease+period) |
+| GET | `/invoices/{id}` | `invoices.view` | Detail with late fee + dunning |
+| POST | `/invoices/{id}/void` | `invoices.generate` | Void (posts ledger reversal; blocked if paid) |
+| POST | `/rent-cycle/generate` | `invoices.generate` | Monthly generation; `{period: "YYYY-MM", dry_run: bool}` |
+| POST | `/late-fees/accrue` | `billing.adjust` | Accrue fees for overdue invoices (idempotent) |
+| POST | `/late-fees/{id}/waive` | `billing.adjust` | Waive a fee (ledger adjustment) |
+
+### Payments
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|------------|-------------|
+| GET | `/payments` | `payments.view` | List (filters: tenant, method, status, date/amount range, search) |
+| POST | `/payments/preview` | `payments.record` | Preview waterfall allocation (no write) |
+| POST | `/payments` | `payments.record` | Record payment; idempotent via `idempotency_key` |
+| GET | `/payments/{id}` | `payments.view` | Detail with allocation lines |
+| POST | `/payments/{id}/reverse` | `payments.reverse` | Reverse (restores balances; keeps history) |
+
+### Ledger / dunning / receipts / financial
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|------------|-------------|
+| GET | `/tenants/{id}/ledger` | `ledger.view` | Statement: opening, entries, closing (derived) |
+| GET | `/tenants/{id}/ledger/balance` | `ledger.view` | Current derived balance |
+| GET | `/dunning` | `dunning.view` | Reminder list |
+| POST | `/dunning/process` | `dunning.manage` | Schedule due reminders (idempotent) |
+| POST | `/dunning/{id}/sent` | `dunning.manage` | Mark sent |
+| GET | `/payments/{id}/receipt` | `receipts.view` | Receipt data |
+| GET | `/payments/{id}/receipt/pdf` | `receipts.view` | Receipt PDF |
+| GET | `/financial/dashboard` | `billing.view` | Billed/collected/outstanding/overdue/rate/aging |
+| GET | `/financial/arrears` | `billing.view` | Unpaid invoices, oldest first |
+| GET | `/financial/periods` | `billing.view` | Period list |
+| POST | `/financial/periods/lock` | `periods.manage` | Lock a past period |
+| POST | `/financial/periods/unlock` | `periods.manage` | Unlock |

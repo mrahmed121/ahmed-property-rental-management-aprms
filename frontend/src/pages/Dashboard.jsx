@@ -5,6 +5,7 @@ import EmptyState from '../components/common/EmptyState';
 import PermissionGuard from '../components/common/PermissionGuard';
 import Spinner from '../components/common/Spinner';
 import { dashboardApi, apiErrorMessage } from '../modules/property/services/propertyApi';
+import { financialApi, formatPKR } from '../modules/billing/services/billingApi';
 
 function RealStatCard({ label, icon, value, loading }) {
   return (
@@ -29,13 +30,15 @@ function RealStatCard({ label, icon, value, loading }) {
 export default function Dashboard() {
   const { user, hasPermission } = useAuth();
   const [stats, setStats] = useState(null);
+  const [financial, setFinancial] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    dashboardApi
-      .stats()
-      .then(setStats)
+    Promise.all([
+      dashboardApi.stats().then(setStats),
+      financialApi.dashboard().then(setFinancial).catch(() => {}),
+    ])
       .catch((err) => setError(apiErrorMessage(err, 'Could not load dashboard statistics.')))
       .finally(() => setLoading(false));
   }, []);
@@ -143,12 +146,39 @@ export default function Dashboard() {
             )}
           </div>
         </PermissionGuard>
-        <PermissionGuard permission="reports.view" showForbidden={false}>
-          <EmptyState
-            icon="📊"
-            title="No financial records yet"
-            hint="Rent cycles, collections and owner statements land in P4–P7. Reports will be generated from posted ledger entries only."
-          />
+        <PermissionGuard permission="billing.view" showForbidden={false}>
+          <div className="aprms-card">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400">Money In</h3>
+              <Link to="/billing" className="text-xs text-gold hover:text-gold-light">Financial overview →</Link>
+            </div>
+            {loading ? (
+              <div className="mt-3"><Spinner /></div>
+            ) : financial ? (
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xl font-bold text-slate-100">{formatPKR(financial.collected_this_period)}</p>
+                  <p className="text-xs text-slate-500">Collected this period</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-red-300">{formatPKR(financial.outstanding)}</p>
+                  <p className="text-xs text-slate-500">Outstanding</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-slate-100">{formatPKR(financial.overdue)}</p>
+                  <p className="text-xs text-slate-500">Overdue</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gold">
+                    {financial.collection_rate === null ? '—' : `${financial.collection_rate}%`}
+                  </p>
+                  <p className="text-xs text-slate-500">Collection rate</p>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-slate-500">No financial data yet.</p>
+            )}
+          </div>
         </PermissionGuard>
       </div>
     </div>

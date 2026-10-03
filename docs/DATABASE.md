@@ -151,3 +151,25 @@ timestamps.
 - No child records under archived parents (service-level guard).
 - Cross-agency FKs are impossible by construction: child rows carry `agency_id`
   and the `AgencyScope` filters every query.
+
+## P4 tables
+
+| Table | Purpose | Key constraints |
+|-------|---------|-----------------|
+| `rent_invoices` | Rent bills per lease period | `UNIQUE(agency_id, invoice_number)`; `UNIQUE(agency_id, lease_id, period_start)` (idempotent cycle) |
+| `payments` | Recorded tenant payments | `UNIQUE(agency_id, receipt_number)`; `UNIQUE(agency_id, idempotency_key)` |
+| `payment_allocations` | Waterfall lines (polymorphic charge) | `UNIQUE(payment_id, allocatable_type, allocatable_id, bucket)` |
+| `tenant_ledger_entries` | Derived running-balance ledger | indexed `(agency_id, tenant_id, entry_date)` |
+| `late_fees` | Accrued fees (rule snapshot) | `UNIQUE(agency_id, invoice_id)` (one fee per invoice) |
+| `dunning_reminders` | Reminder cadence state | `UNIQUE(agency_id, invoice_id, stage)` |
+| `financial_periods` | Period open/locked | `UNIQUE(agency_id, period)` |
+
+### Integrity rules
+
+- `payments.amount > 0`; `sum(allocations) ≤ payment.amount`.
+- Ledger `balance_after` is derived, never hand-set; `lockForUpdate()`
+  serializes balance computation per tenant.
+- Posted financial rows are never hard-deleted: payments are
+  `reversed`, invoices `void`ed, each with a compensating ledger entry.
+- Invoice creation, payment posting, allocation, and late-fee accrual
+  all run inside transactions with row locks.

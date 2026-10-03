@@ -18,6 +18,17 @@ import LeasesPage from './modules/leasing/pages/LeasesPage';
 import LeaseFormPage from './modules/leasing/pages/LeaseFormPage';
 import LeaseDetailPage from './modules/leasing/pages/LeaseDetailPage';
 import InspectionsPage from './modules/leasing/pages/InspectionsPage';
+// P4 — Billing domain
+import InvoicesPage from './modules/billing/pages/InvoicesPage';
+import InvoiceDetailPage from './modules/billing/pages/InvoiceDetailPage';
+import RentCyclePage from './modules/billing/pages/RentCyclePage';
+import PaymentsPage from './modules/billing/pages/PaymentsPage';
+import PaymentFormPage from './modules/billing/pages/PaymentFormPage';
+import PaymentDetailPage from './modules/billing/pages/PaymentDetailPage';
+import LedgerPage from './modules/billing/pages/LedgerPage';
+import ArrearsPage from './modules/billing/pages/ArrearsPage';
+import DunningPage from './modules/billing/pages/DunningPage';
+import FinancialDashboardPage from './modules/billing/pages/FinancialDashboardPage';
 
 function Placeholder({ title, hint }) {
   return (
@@ -56,6 +67,17 @@ export default function App() {
             <Route path="leases/new" element={<LeaseFormPage />} />
             <Route path="leases/:id" element={<LeaseDetailPage />} />
             <Route path="inspections" element={<InspectionsPage />} />
+            {/* P4 — Billing domain */}
+            <Route path="billing" element={<FinancialDashboardPage />} />
+            <Route path="billing/invoices" element={<InvoicesPage />} />
+            <Route path="billing/invoices/:id" element={<InvoiceDetailPage />} />
+            <Route path="billing/rent-cycle" element={<RentCyclePage />} />
+            <Route path="billing/payments" element={<PaymentsPage />} />
+            <Route path="billing/payments/new" element={<PaymentFormPage />} />
+            <Route path="billing/payments/:id" element={<PaymentDetailPage />} />
+            <Route path="billing/ledger/:tenantId" element={<LedgerPage />} />
+            <Route path="billing/arrears" element={<ArrearsPage />} />
+            <Route path="billing/dunning" element={<DunningPage />} />
             {/* P1 admin placeholders — remaining modules land in P3+ */}
             <Route
               path="users"

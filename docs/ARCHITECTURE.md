@@ -144,3 +144,58 @@ carries 4 advisories with no patched 11.x available, so `composer.json` sets
 - `PKSA-m5cs-t1y6-qpcs` (signed-URL path confusion) — P1 uses no signed URLs.
 - `PKSA-3r5d-mb8f-1qw9` / `PKSA-mdq4-51ck-6kdq` (CRLF in default email rule) — we validate with `email:rfc`; framework upgrade planned with P9.
 Revisit on every phase: if a patched 11.x/12.x appears, pin it and re-enable the policy.
+
+## P4 — Billing domain (money-in)
+
+### Financial model
+
+Four core tables carry the money: `rent_invoices`, `payments`,
+`payment_allocations`, `tenant_ledger_entries`. Supporting tables:
+`late_fees`, `dunning_reminders`, `financial_periods`. All are
+agency-scoped; posted records are never hard-deleted.
+
+### Allocation waterfall (fixed, deterministic)
+
+1. Late fees (oldest accrued first)
+2. Utilities (oldest invoice first)
+3. Current rent (current-period invoice)
+4. Oldest arrears
+
+The order is not user-configurable. Invariants: `sum(allocations) ≤
+payment.amount`; no allocation exceeds its charge's remaining balance;
+excess stays as unallocated credit on the payment — never silently lost.
+
+### Rent cycle
+
+`RentCycleService::generateForPeriod("YYYY-MM", $dryRun)` invoices all
+eligible active leases (overlapping the period, unit not archived).
+Idempotent via `UNIQUE(agency_id, lease_id, period_start)`.
+
+**Proration rule:** `monthly_rent × (billable_days ÷ days_in_month)`,
+rounded half-up to 2 decimals. `billable_days` = days in
+`[period_start, period_end] ∩ [lease_start, lease_end]`. Full months bill
+exactly `monthly_rent`.
+
+### Late fees
+
+Accrued from agency settings (`billing.late_fee_type/value/cap`,
+`billing.grace_days`) — no invented percentages. One fee per invoice
+(`UNIQUE(agency_id, invoice_id)`); the rule is snapshotted on the fee.
+
+### Ledger discipline
+
+`TenantLedgerService` is the single write path. `balance_after =
+previous + debit − credit`, computed under a row lock on the tenant's
+latest entry. Corrections use new `adjustment`/`reversal` entries.
+
+### Period locking
+
+`FinancialPeriodService` locks past periods (`YYYY-MM`). Invoice,
+payment, and late-fee writes assert the period is open; corrections go
+through adjustments/reversals.
+
+### Security advisories
+
+`barryvdh/laravel-dompdf` added for receipt PDFs. The pre-existing
+`laravel/framework` advisories remain documented with `policy: false`
+(see above); dompdf introduces no new advisories at install time.

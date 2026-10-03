@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             SettingSeeder::class,
             PropertySeeder::class,
             LeasingSeeder::class,
+            BillingSeeder::class,
         ]);
     }
 }

@@ -22,6 +22,16 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Billing',
+    items: [
+      { to: '/billing', label: 'Overview', icon: '💰', permission: 'billing.view' },
+      { to: '/billing/invoices', label: 'Invoices', icon: '🧾', permission: 'invoices.view' },
+      { to: '/billing/payments', label: 'Payments', icon: '💳', permission: 'payments.view' },
+      { to: '/billing/arrears', label: 'Arrears', icon: '⚠️', permission: 'billing.view' },
+      { to: '/billing/dunning', label: 'Dunning', icon: '📬', permission: 'dunning.view' },
+    ],
+  },
+  {
     label: 'Administration',
     items: [
       { to: '/users', label: 'Users & Roles', icon: '👥', permission: 'users.view' },

@@ -7,12 +7,21 @@ property managers: properties, leases, rent collection, deposits, maintenance,
 expenses, owner statements, and reports — with strict multi-agency isolation,
 role-based access, and a full audit trail.
 
-**Status: P3 Leasing domain — implemented and verified.**
-107 backend tests pass (576 assertions) · 21 frontend tests pass.
-P4+ domain modules (Billing, Maintenance, Reporting) are documented
-contracts; their business logic lands in their own phases.
+**Status: P4 Billing (money-in) — implemented and verified.**
+140 backend tests pass (840 assertions) · 29 frontend tests pass.
+P5+ domain modules (Maintenance billing, Reporting, owner statements) are
+documented contracts; their business logic lands in their own phases.
 
-### P3 Leasing (current)
+### P4 Billing / money-in (current)
+Real financial subsystem: rent invoices (INV-…) generated from active
+leases via an idempotent monthly rent cycle with mid-month proration;
+payments (RCPT-…) recorded with idempotency keys and allocated through a
+fixed waterfall (late fees → utilities → current rent → oldest arrears);
+derived tenant ledger (no hand-edited balances); late fees from agency
+settings with caps; dunning reminders (day 3/7/15/30); PDF receipts;
+financial period locking; payment reversal (never hard-delete).
+
+### P3 Leasing
 Full tenancy lifecycle: tenants → applications → screening/KYC → leases →
 activation → renewal → termination → move-out inspections. Unit occupancy
 updates automatically; overlapping active leases are rejected inside a

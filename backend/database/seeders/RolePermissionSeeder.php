@@ -41,6 +41,19 @@ class RolePermissionSeeder extends Seeder
         ['slug' => 'leases.manage', 'name' => 'Create/activate/renew/terminate leases', 'group' => 'leases'],
         ['slug' => 'inspections.view', 'name' => 'View move-out inspections', 'group' => 'inspections'],
         ['slug' => 'inspections.manage', 'name' => 'Record/review move-out inspections', 'group' => 'inspections'],
+        // P4 — Billing / money-in domain
+        ['slug' => 'billing.view', 'name' => 'View financial information', 'group' => 'billing'],
+        ['slug' => 'invoices.view', 'name' => 'View rent invoices', 'group' => 'billing'],
+        ['slug' => 'invoices.generate', 'name' => 'Generate/void rent invoices', 'group' => 'billing'],
+        ['slug' => 'payments.view', 'name' => 'View payments', 'group' => 'billing'],
+        ['slug' => 'payments.record', 'name' => 'Record tenant payments', 'group' => 'billing'],
+        ['slug' => 'payments.reverse', 'name' => 'Reverse payments (corrections)', 'group' => 'billing'],
+        ['slug' => 'ledger.view', 'name' => 'View tenant ledger', 'group' => 'billing'],
+        ['slug' => 'dunning.view', 'name' => 'View dunning reminders', 'group' => 'billing'],
+        ['slug' => 'dunning.manage', 'name' => 'Run dunning and mark reminders sent', 'group' => 'billing'],
+        ['slug' => 'receipts.view', 'name' => 'View/download receipts', 'group' => 'billing'],
+        ['slug' => 'periods.manage', 'name' => 'Lock/unlock financial periods', 'group' => 'billing'],
+        ['slug' => 'billing.adjust', 'name' => 'Apply adjustments and waive fees', 'group' => 'billing'],
     ];
 
     /**
@@ -49,14 +62,14 @@ class RolePermissionSeeder extends Seeder
      */
     public const ROLE_MATRIX = [
         'super-admin' => ['*'],
-        'agency-admin' => ['dashboard.view', 'users.view', 'users.manage', 'roles.view', 'roles.manage', 'settings.view', 'settings.manage', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage', 'screening.view', 'screening.manage', 'leases.view', 'leases.manage', 'inspections.view', 'inspections.manage'],
-        'property-manager' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage', 'screening.view', 'screening.manage', 'leases.view', 'leases.manage', 'inspections.view', 'inspections.manage'],
-        'accountant' => ['dashboard.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'screening.view', 'leases.view'],
+        'agency-admin' => ['dashboard.view', 'users.view', 'users.manage', 'roles.view', 'roles.manage', 'settings.view', 'settings.manage', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage', 'screening.view', 'screening.manage', 'leases.view', 'leases.manage', 'inspections.view', 'inspections.manage', 'billing.view', 'invoices.view', 'invoices.generate', 'payments.view', 'payments.record', 'payments.reverse', 'ledger.view', 'dunning.view', 'dunning.manage', 'receipts.view', 'periods.manage', 'billing.adjust'],
+        'property-manager' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage', 'screening.view', 'screening.manage', 'leases.view', 'leases.manage', 'inspections.view', 'inspections.manage', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'dunning.view', 'receipts.view'],
+        'accountant' => ['dashboard.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'screening.view', 'leases.view', 'billing.view', 'invoices.view', 'invoices.generate', 'payments.view', 'payments.record', 'payments.reverse', 'ledger.view', 'dunning.view', 'dunning.manage', 'receipts.view', 'billing.adjust'],
         'maintenance-supervisor' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'inspections.view'],
         'technician' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view'],
-        'owner' => ['dashboard.view', 'settings.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'leases.view', 'inspections.view'],
-        'tenant' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'leases.view', 'inspections.view'],
-        'auditor' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'screening.view', 'leases.view', 'inspections.view'],
+        'owner' => ['dashboard.view', 'settings.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'leases.view', 'inspections.view', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'receipts.view'],
+        'tenant' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'leases.view', 'inspections.view', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'receipts.view'],
+        'auditor' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'screening.view', 'leases.view', 'inspections.view', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'dunning.view', 'receipts.view'],
     ];
 
     public const ROLE_NAMES = [
