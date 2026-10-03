@@ -54,11 +54,11 @@ class PropertyDocumentTest extends TestCase
         );
         $response->assertStatus(404);
 
-        // Invalid parent type => 422.
+        // Invalid parent type => 422. ('lease' became valid in P3.)
         $property = Property::where('name', 'Gulshan Residency')->firstOrFail();
         $file2 = UploadedFile::fake()->create('y.pdf', 100, 'application/pdf');
         $response2 = $this->call(
-            'POST', '/api/v1/documents', ['parent_type' => 'lease', 'parent_id' => $property->id],
+            'POST', '/api/v1/documents', ['parent_type' => 'invoice', 'parent_id' => $property->id],
             [], ['file' => $file2], $this->jsonServerVars($token)
         );
         $response2->assertStatus(422);

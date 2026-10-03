@@ -5,7 +5,12 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BuildingController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DocumentController;
+use App\Http\Controllers\Api\V1\ApplicationController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\InspectionController;
+use App\Http\Controllers\Api\V1\LeaseController;
+use App\Http\Controllers\Api\V1\ScreeningController;
+use App\Http\Controllers\Api\V1\TenantController;
 use App\Http\Controllers\Api\V1\PropertyController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SettingController;
@@ -81,5 +86,33 @@ Route::prefix('v1')->group(function () {
         Route::post('documents', [DocumentController::class, 'store'])->middleware('permission:documents.manage');
         Route::get('documents/{document}/download', [DocumentController::class, 'download'])->middleware('permission:documents.view');
         Route::delete('documents/{document}', [DocumentController::class, 'destroy'])->middleware('permission:documents.manage');
+
+        // P3 — Leasing domain
+        Route::get('tenants', [TenantController::class, 'index'])->middleware('permission:tenants.view');
+        Route::post('tenants', [TenantController::class, 'store'])->middleware('permission:tenants.manage');
+        Route::get('tenants/{tenant}', [TenantController::class, 'show'])->middleware('permission:tenants.view');
+        Route::put('tenants/{tenant}', [TenantController::class, 'update'])->middleware('permission:tenants.manage');
+        Route::delete('tenants/{tenant}', [TenantController::class, 'destroy'])->middleware('permission:tenants.manage');
+
+        Route::get('applications', [ApplicationController::class, 'index'])->middleware('permission:applications.view');
+        Route::post('applications', [ApplicationController::class, 'store'])->middleware('permission:applications.manage');
+        Route::get('applications/{application}', [ApplicationController::class, 'show'])->middleware('permission:applications.view');
+        Route::post('applications/{application}/transition', [ApplicationController::class, 'transition'])->middleware('permission:applications.manage');
+        Route::post('applications/{application}/screening/start', [ScreeningController::class, 'start'])->middleware('permission:screening.manage');
+        Route::post('applications/{application}/screening/decide', [ScreeningController::class, 'decide'])->middleware('permission:screening.manage');
+
+        Route::get('leases', [LeaseController::class, 'index'])->middleware('permission:leases.view');
+        Route::post('leases', [LeaseController::class, 'store'])->middleware('permission:leases.manage');
+        Route::get('leases/{lease}', [LeaseController::class, 'show'])->middleware('permission:leases.view');
+        Route::put('leases/{lease}', [LeaseController::class, 'update'])->middleware('permission:leases.manage');
+        Route::post('leases/{lease}/activate', [LeaseController::class, 'activate'])->middleware('permission:leases.manage');
+        Route::post('leases/{lease}/renew', [LeaseController::class, 'renew'])->middleware('permission:leases.manage');
+        Route::post('leases/{lease}/terminate', [LeaseController::class, 'terminate'])->middleware('permission:leases.manage');
+
+        Route::get('inspections', [InspectionController::class, 'index'])->middleware('permission:inspections.view');
+        Route::post('inspections', [InspectionController::class, 'store'])->middleware('permission:inspections.manage');
+        Route::get('inspections/{inspection}', [InspectionController::class, 'show'])->middleware('permission:inspections.view');
+        Route::put('inspections/{inspection}', [InspectionController::class, 'update'])->middleware('permission:inspections.manage');
+        Route::post('inspections/{inspection}/review', [InspectionController::class, 'review'])->middleware('permission:inspections.manage');
     });
 });

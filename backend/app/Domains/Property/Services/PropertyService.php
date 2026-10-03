@@ -20,7 +20,7 @@ class PropertyService extends DomainService
             ->with('owner:id,name,email')
             ->orderBy($filters['sort_by'] ?? 'name', $filters['sort_dir'] ?? 'asc');
 
-        PropertyAccess::applyToPropertyQuery($query, $this->actor);
+        PropertyAccess::applyToPropertyQuery($query, $this->actor());
 
         if (! empty($filters['search'])) {
             $s = '%'.$filters['search'].'%';
@@ -43,14 +43,14 @@ class PropertyService extends DomainService
     public function find(int $id): Property
     {
         $query = Property::with(['owner:id,name,email', 'buildings', 'units']);
-        PropertyAccess::applyToPropertyQuery($query, $this->actor);
+        PropertyAccess::applyToPropertyQuery($query, $this->actor());
 
         return $query->findOrFail($id); // 404 — never leaks existence
     }
 
     public function create(array $data): Property
     {
-        $actor = $this->actor;
+        $actor = $this->actor();
 
         $agencyId = $actor->isSuperAdmin() ? ($data['agency_id'] ?? null) : $actor->agency_id;
         if (! $agencyId) {
@@ -96,6 +96,11 @@ class PropertyService extends DomainService
     {
         $this->ensurePropertyAccess($property);
 
+        // P3: active leases are live agreements — terminate them first.
+        if ($this->hasActiveLeases($property->id)) {
+            abort(422, 'Cannot archive a property with active leases. Terminate the leases first.');
+        }
+
         DB::transaction(function () use ($property) {
             $property->units()->delete();
             $property->buildings()->delete();
@@ -111,7 +116,7 @@ class PropertyService extends DomainService
     public function restore(int $id): Property
     {
         $query = Property::onlyTrashed()->with(['buildings', 'units']);
-        PropertyAccess::applyToPropertyQuery($query, $this->actor);
+        PropertyAccess::applyToPropertyQuery($query, $this->actor());
         $property = $query->findOrFail($id);
 
         DB::transaction(function () use ($property) {
@@ -128,7 +133,7 @@ class PropertyService extends DomainService
     /** Real dashboard numbers: agency-scoped, portfolio-scoped, no fabrication. */
     public function stats(): array
     {
-        $actor = $this->actor;
+        $actor = $this->actor();
         $ids = PropertyAccess::accessiblePropertyIds($actor);
 
         $properties = Property::query();
@@ -142,7 +147,7 @@ class PropertyService extends DomainService
         }
         // Note: AgencyScope already constrains non-super-admins to their agency.
 
-        return [
+        $stats = [
             'total_properties' => (clone $properties)->count(),
             'total_buildings' => (clone $buildings)->count(),
             'total_units' => (clone $units)->count(),
@@ -154,6 +159,19 @@ class PropertyService extends DomainService
                 ->pluck('count', 'status')
                 ->all(),
         ];
+
+        // P3 — leasing metrics (same agency/portfolio scoping).
+        $stats = array_merge($stats, app(\App\Domains\Leasing\Services\DashboardLeasingMetrics::class)->forActor($actor, $ids));
+
+        return $stats;
+    }
+
+    private function hasActiveLeases(int $propertyId): bool
+    {
+        return \App\Domains\Leasing\Models\Lease::withoutAgencyScope()
+            ->where('property_id', $propertyId)
+            ->where('status', 'active')
+            ->exists();
     }
 
     /** Guard: actor may access this property (agency + portfolio). */
@@ -161,7 +179,7 @@ class PropertyService extends DomainService
     {
         $this->ensureAgencyAccess($property->agency_id);
 
-        $ids = PropertyAccess::accessiblePropertyIds($this->actor);
+        $ids = PropertyAccess::accessiblePropertyIds($this->actor());
         if (! is_null($ids) && ! in_array($property->id, $ids, true)) {
             abort(404); // never leak existence outside the portfolio
         }

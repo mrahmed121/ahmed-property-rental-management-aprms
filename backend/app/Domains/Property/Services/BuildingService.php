@@ -15,7 +15,7 @@ class BuildingService extends DomainService
             ->with('property:id,name')
             ->orderBy($filters['sort_by'] ?? 'name', $filters['sort_dir'] ?? 'asc');
 
-        PropertyAccess::applyToPropertyQuery($query, $this->actor, 'property_id');
+        PropertyAccess::applyToPropertyQuery($query, $this->actor(), 'property_id');
 
         if (! empty($filters['property_id'])) {
             $property = $this->resolveProperty((int) $filters['property_id']);
@@ -34,7 +34,7 @@ class BuildingService extends DomainService
     public function find(int $id): Building
     {
         $query = Building::with(['property', 'units']);
-        PropertyAccess::applyToPropertyQuery($query, $this->actor, 'property_id');
+        PropertyAccess::applyToPropertyQuery($query, $this->actor(), 'property_id');
 
         return $query->findOrFail($id);
     }
@@ -78,6 +78,12 @@ class BuildingService extends DomainService
     {
         $this->ensureBuildingAccess($building);
 
+        if (\App\Domains\Leasing\Models\Lease::withoutAgencyScope()
+            ->where('building_id', $building->id)
+            ->where('status', 'active')->exists()) {
+            abort(422, 'Cannot archive a building with active leases. Terminate the leases first.');
+        }
+
         DB::transaction(function () use ($building) {
             $building->units()->delete();
             $building->delete();
@@ -91,7 +97,7 @@ class BuildingService extends DomainService
     public function restore(int $id): Building
     {
         $query = Building::onlyTrashed()->with('property');
-        PropertyAccess::applyToPropertyQuery($query, $this->actor, 'property_id');
+        PropertyAccess::applyToPropertyQuery($query, $this->actor(), 'property_id');
         $building = $query->findOrFail($id);
 
         if ($building->property && $building->property->trashed()) {
@@ -115,7 +121,7 @@ class BuildingService extends DomainService
     public function resolveProperty(int $propertyId): Property
     {
         $query = Property::query();
-        PropertyAccess::applyToPropertyQuery($query, $this->actor);
+        PropertyAccess::applyToPropertyQuery($query, $this->actor());
 
         return $query->findOrFail($propertyId);
     }

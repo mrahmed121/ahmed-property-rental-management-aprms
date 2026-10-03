@@ -7,10 +7,16 @@ property managers: properties, leases, rent collection, deposits, maintenance,
 expenses, owner statements, and reports — with strict multi-agency isolation,
 role-based access, and a full audit trail.
 
-**Status: P2 Property domain — implemented and verified.**
-79 backend tests pass (323 assertions) · 14 frontend tests pass.
-P3+ domain modules (Leasing, Billing, Maintenance, Reporting) are documented
+**Status: P3 Leasing domain — implemented and verified.**
+107 backend tests pass (576 assertions) · 21 frontend tests pass.
+P4+ domain modules (Billing, Maintenance, Reporting) are documented
 contracts; their business logic lands in their own phases.
+
+### P3 Leasing (current)
+Full tenancy lifecycle: tenants → applications → screening/KYC → leases →
+activation → renewal → termination → move-out inspections. Unit occupancy
+updates automatically; overlapping active leases are rejected inside a
+row-locked transaction; archive is blocked while active leases exist.
 
 ---
 

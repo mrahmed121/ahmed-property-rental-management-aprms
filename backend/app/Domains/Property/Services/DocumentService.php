@@ -74,7 +74,7 @@ class DocumentService extends DomainService
             'mime_type' => $file->getMimeType(),
             'file_size' => $file->getSize(),
             'description' => $data['description'] ?? null,
-            'uploaded_by' => $this->actor?->id,
+            'uploaded_by' => $this->actor()?->id,
         ]));
 
         $this->audit()->logModelChange('documents.upload', $document);
@@ -120,7 +120,7 @@ class DocumentService extends DomainService
     }
 
     /** Resolve a parent entity by key, enforcing agency + portfolio access. */
-    public function resolveParent(string $parentType, int $parentId): Property|Building|Unit
+    public function resolveParent(string $parentType, int $parentId): Property|Building|Unit|\App\Domains\Leasing\Models\Tenant|\App\Domains\Leasing\Models\TenantApplication|\App\Domains\Leasing\Models\Lease|\App\Domains\Leasing\Models\MoveOutInspection
     {
         $class = PropertyDocument::ALLOWED_PARENTS[$parentType] ?? null;
         if (! $class) {
@@ -129,9 +129,9 @@ class DocumentService extends DomainService
 
         $query = $class::query();
         if ($class === Property::class) {
-            PropertyAccess::applyToPropertyQuery($query, $this->actor);
+            PropertyAccess::applyToPropertyQuery($query, $this->actor());
         } else {
-            PropertyAccess::applyToPropertyQuery($query, $this->actor, 'property_id');
+            PropertyAccess::applyToPropertyQuery($query, $this->actor(), 'property_id');
         }
 
         return $query->findOrFail($parentId);
@@ -148,40 +148,75 @@ class DocumentService extends DomainService
         $this->ensureParentAccess($parent);
     }
 
-    private function ensureParentAccess(Property|Building|Unit $parent): void
+    private function ensureParentAccess(Property|Building|Unit|\App\Domains\Leasing\Models\Tenant|\App\Domains\Leasing\Models\TenantApplication|\App\Domains\Leasing\Models\Lease|\App\Domains\Leasing\Models\MoveOutInspection $parent): void
     {
-        $propertyService = app(PropertyService::class);
-
         if ($parent instanceof Property) {
-            $propertyService->ensurePropertyAccess($parent);
+            app(PropertyService::class)->ensurePropertyAccess($parent);
         } elseif ($parent instanceof Building) {
             app(BuildingService::class)->ensureBuildingAccess($parent);
-        } else {
+        } elseif ($parent instanceof Unit) {
             app(UnitService::class)->ensureUnitAccess($parent);
+        } elseif ($parent instanceof \App\Domains\Leasing\Models\Tenant) {
+            app(\App\Domains\Leasing\Services\TenantService::class)->ensureTenantAccess($parent);
+        } elseif ($parent instanceof \App\Domains\Leasing\Models\TenantApplication) {
+            app(\App\Domains\Leasing\Services\ApplicationService::class)->ensureApplicationAccess($parent);
+        } elseif ($parent instanceof \App\Domains\Leasing\Models\Lease) {
+            app(\App\Domains\Leasing\Services\LeaseService::class)->ensureLeaseAccess($parent);
+        } else {
+            app(\App\Domains\Leasing\Services\MoveOutInspectionService::class)->ensureInspectionAccess($parent);
         }
     }
 
     /** Portfolio-scope a document query via its polymorphic parent. */
     private function applyPortfolioScope($query): void
     {
-        $ids = PropertyAccess::accessiblePropertyIds($this->actor);
+        $propertyIds = PropertyAccess::accessiblePropertyIds($this->actor());
+        $tenantIds = \App\Domains\Leasing\Services\TenantAccess::accessibleTenantIds($this->actor());
 
-        if (is_null($ids)) {
+        if (is_null($propertyIds) && is_null($tenantIds)) {
             return;
         }
 
-        $query->where(function ($q) use ($ids) {
-            $q->where(fn ($qq) => $qq
-                    ->where('documentable_type', Property::class)
-                    ->whereIn('documentable_id', $ids))
-                ->orWhere(fn ($qq) => $qq
-                    ->where('documentable_type', Building::class)
-                    ->whereIn('documentable_id',
-                        Building::withoutAgencyScope()->whereIn('property_id', $ids)->pluck('id')))
-                ->orWhere(fn ($qq) => $qq
-                    ->where('documentable_type', Unit::class)
-                    ->whereIn('documentable_id',
-                        Unit::withoutAgencyScope()->whereIn('property_id', $ids)->pluck('id')));
+        $query->where(function ($q) use ($propertyIds, $tenantIds) {
+            $first = true;
+
+            if (! is_null($propertyIds)) {
+                $q->where(fn ($qq) => $qq
+                        ->where('documentable_type', Property::class)
+                        ->whereIn('documentable_id', $propertyIds))
+                    ->orWhere(fn ($qq) => $qq
+                        ->where('documentable_type', Building::class)
+                        ->whereIn('documentable_id',
+                            Building::withoutAgencyScope()->whereIn('property_id', $propertyIds)->pluck('id')))
+                    ->orWhere(fn ($qq) => $qq
+                        ->where('documentable_type', Unit::class)
+                        ->whereIn('documentable_id',
+                            Unit::withoutAgencyScope()->whereIn('property_id', $propertyIds)->pluck('id')));
+                $first = false;
+            }
+
+            if (! is_null($tenantIds)) {
+                $tenant = \App\Domains\Leasing\Models\Tenant::class;
+                $application = \App\Domains\Leasing\Models\TenantApplication::class;
+                $lease = \App\Domains\Leasing\Models\Lease::class;
+                $inspection = \App\Domains\Leasing\Models\MoveOutInspection::class;
+
+                $clause = fn ($qq) => $qq
+                    ->where(fn ($w) => $w->where('documentable_type', $tenant)->whereIn('documentable_id', $tenantIds))
+                    ->orWhere(fn ($w) => $w->where('documentable_type', $application)
+                        ->whereIn('documentable_id', \App\Domains\Leasing\Models\TenantApplication::withoutAgencyScope()->whereIn('tenant_id', $tenantIds)->pluck('id')))
+                    ->orWhere(fn ($w) => $w->where('documentable_type', $lease)
+                        ->whereIn('documentable_id', \App\Domains\Leasing\Models\Lease::withoutAgencyScope()->whereIn('tenant_id', $tenantIds)->pluck('id')))
+                    ->orWhere(fn ($w) => $w->where('documentable_type', $inspection)
+                        ->whereIn('documentable_id', \App\Domains\Leasing\Models\MoveOutInspection::withoutAgencyScope()
+                            ->whereHas('lease', fn ($l) => $l->whereIn('tenant_id', $tenantIds))->pluck('id')));
+
+                if ($first) {
+                    $q->where($clause);
+                } else {
+                    $q->orWhere($clause);
+                }
+            }
         });
     }
 

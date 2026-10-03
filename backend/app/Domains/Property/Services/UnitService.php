@@ -14,7 +14,7 @@ class UnitService extends DomainService
         $query = Unit::with(['building:id,name', 'property:id,name'])
             ->orderBy($filters['sort_by'] ?? 'unit_number', $filters['sort_dir'] ?? 'asc');
 
-        PropertyAccess::applyToPropertyQuery($query, $this->actor, 'property_id');
+        PropertyAccess::applyToPropertyQuery($query, $this->actor(), 'property_id');
 
         if (! empty($filters['building_id'])) {
             $building = $this->resolveBuilding((int) $filters['building_id']);
@@ -39,7 +39,7 @@ class UnitService extends DomainService
     public function find(int $id): Unit
     {
         $query = Unit::with(['building', 'property', 'documents']);
-        PropertyAccess::applyToPropertyQuery($query, $this->actor, 'property_id');
+        PropertyAccess::applyToPropertyQuery($query, $this->actor(), 'property_id');
 
         return $query->findOrFail($id);
     }
@@ -83,6 +83,13 @@ class UnitService extends DomainService
     public function archive(Unit $unit): Unit
     {
         $this->ensureUnitAccess($unit);
+
+        if (\App\Domains\Leasing\Models\Lease::withoutAgencyScope()
+            ->where('unit_id', $unit->id)
+            ->where('status', 'active')->exists()) {
+            abort(422, 'Cannot archive a unit with active leases. Terminate the lease first.');
+        }
+
         $unit->delete();
 
         $this->audit()->log('units.archive', $unit);
@@ -93,7 +100,7 @@ class UnitService extends DomainService
     public function restore(int $id): Unit
     {
         $query = Unit::onlyTrashed()->with(['building', 'property']);
-        PropertyAccess::applyToPropertyQuery($query, $this->actor, 'property_id');
+        PropertyAccess::applyToPropertyQuery($query, $this->actor(), 'property_id');
         $unit = $query->findOrFail($id);
 
         if (($unit->building && $unit->building->trashed())
@@ -110,7 +117,7 @@ class UnitService extends DomainService
     public function resolveBuilding(int $buildingId): Building
     {
         $query = Building::query();
-        PropertyAccess::applyToPropertyQuery($query, $this->actor, 'property_id');
+        PropertyAccess::applyToPropertyQuery($query, $this->actor(), 'property_id');
 
         return $query->findOrFail($buildingId);
     }

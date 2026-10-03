@@ -1,4 +1,4 @@
-# APRMS Database (P1 + P2)
+# APRMS Database (P1 + P2 + P3)
 
 Engine: SQLite by default (`database/database.sqlite`), MySQL/PostgreSQL compatible.
 All tables below are migrated. Financial tables arrive in P4+.
@@ -74,14 +74,57 @@ Index: (agency_id, status).
 UNIQUE(building_id, unit_number) — unit identifiers unique within their building.
 Indexes: (agency_id, status), (property_id, status).
 
-### property_documents (P2)
+### property_documents (P2, extended P3)
 `agency_id` FK `cascadeOnDelete`, polymorphic parent
-(`documentable_type` = Property|Building|Unit, `documentable_id`),
+(`documentable_type` = Property|Building|Unit|Tenant|TenantApplication|Lease|MoveOutInspection,
+`documentable_id`),
 `name`, `document_type` (`deed|noc|floor_plan|photo|agreement|other`),
 `file_path` (relative, inside `storage/app/private/documents/{agency_id}/` —
 never a URL, never web-accessible), `mime_type`, `file_size`,
 `description` nullable, `uploaded_by` FK → users nullable, timestamps.
 Index: (agency_id, documentable_type, documentable_id).
+
+### tenants (P3)
+`agency_id` FK `cascadeOnDelete`, `user_id` FK → users nullable (portal link),
+`first_name`, `last_name`, `email` nullable, `phone` nullable, `national_id`
+nullable (write-only via API; returned masked), `address`/`city` nullable,
+`emergency_contact_name`/`phone` nullable, `kyc_status`
+(`pending|verified|rejected`, default `pending`), `status`
+(`prospective|active|inactive`, default `prospective`), `notes` nullable, soft deletes.
+Indexes: (agency_id, status), (agency_id, last_name, first_name).
+
+### tenant_applications (P3)
+`agency_id` FK `cascadeOnDelete`, `tenant_id` FK `cascadeOnDelete`,
+`property_id` FK `cascadeOnDelete`, `unit_id` FK nullable `cascadeOnDelete`,
+`application_number` unique per agency (e.g. `APP-1-2026-000001`), `status`
+(`draft|submitted|under_review|screening|approved|rejected`, default `draft`),
+`screening_status` (`pending|in_progress|clear|flagged`, default `pending`),
+`screening_notes` nullable, `screened_by` FK → users nullable, `screened_at` nullable,
+`decision_notes` nullable, `reviewed_by` FK → users nullable, `reviewed_at` nullable,
+timestamps.
+Indexes: (agency_id, status), (tenant_id, status).
+
+### leases (P3)
+`agency_id` FK `cascadeOnDelete`, `tenant_id` FK `cascadeOnDelete`,
+`unit_id` FK `cascadeOnDelete`, `property_id`/`building_id` FK `cascadeOnDelete`
+(denormalized from the unit at creation), `application_id` FK nullable,
+`previous_lease_id` FK nullable → leases (renewal chain),
+`lease_number` unique per agency (e.g. `LSE-1-2026-000001`),
+`start_date`/`end_date` (end after start), `monthly_rent` decimal,
+`deposit_amount` decimal nullable, `status`
+(`draft|active|renewed|terminated|expired`, default `draft`),
+`terms` nullable, `notes` nullable, `created_by` FK → users nullable,
+`activated_at`/`terminated_at` nullable, `termination_reason` nullable,
+timestamps.
+Indexes: (agency_id, status), (unit_id, status), (tenant_id, status).
+
+### move_out_inspections (P3)
+`agency_id` FK `cascadeOnDelete`, `lease_id` FK `cascadeOnDelete` unique
+(one inspection per lease), `inspection_date`, `condition`
+(`excellent|good|fair|poor|damaged`), `damage_observations` nullable,
+`notes` nullable, `inspector_id` FK → users nullable,
+`review_status` (`pending|reviewed`, default `pending`), `reviewed_at` nullable,
+timestamps.
 
 ## Integrity rules enforced
 - One role slug per agency (partial uniqueness via nullable FK in unique key).
@@ -93,6 +136,18 @@ Index: (agency_id, documentable_type, documentable_id).
   building `name` is unique per property.
 - A building's `property_id` and a unit's `building_id` are immutable after
   creation — children never move between parents.
+- P3: an application moves `draft → submitted → under_review → screening →
+  approved/rejected`; approval requires clear screening + verified tenant KYC.
+- P3: a lease moves `draft → active → renewed/terminated/expired`. Activation
+  runs inside a row-locked transaction (`lockForUpdate` on the unit), rejects
+  overlapping active leases for the same unit, and sets the unit `occupied`.
+  Termination/expiry restore `vacant` when no replacement active lease exists.
+- P3: renewal creates a successor lease (`previous_lease_id`); the original
+  flips to `renewed` only when the successor activates — history is never
+  overwritten.
+- P3: archiving a property/building/unit with active leases is blocked (422).
+- P3: one move-out inspection per lease; inspections require a
+  terminated/expired lease.
 - No child records under archived parents (service-level guard).
 - Cross-agency FKs are impossible by construction: child rows carry `agency_id`
   and the `AgencyScope` filters every query.

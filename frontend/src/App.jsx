@@ -8,6 +8,16 @@ import EmptyState from './components/common/EmptyState';
 import PropertiesPage from './modules/property/pages/PropertiesPage';
 import PropertyFormPage from './modules/property/pages/PropertyFormPage';
 import PropertyDetailPage from './modules/property/pages/PropertyDetailPage';
+// P3 — Leasing domain
+import TenantsPage from './modules/leasing/pages/TenantsPage';
+import TenantFormPage from './modules/leasing/pages/TenantFormPage';
+import TenantDetailPage from './modules/leasing/pages/TenantDetailPage';
+import ApplicationsPage from './modules/leasing/pages/ApplicationsPage';
+import ApplicationDetailPage from './modules/leasing/pages/ApplicationDetailPage';
+import LeasesPage from './modules/leasing/pages/LeasesPage';
+import LeaseFormPage from './modules/leasing/pages/LeaseFormPage';
+import LeaseDetailPage from './modules/leasing/pages/LeaseDetailPage';
+import InspectionsPage from './modules/leasing/pages/InspectionsPage';
 
 function Placeholder({ title, hint }) {
   return (
@@ -34,6 +44,18 @@ export default function App() {
             <Route path="properties/new" element={<PropertyFormPage />} />
             <Route path="properties/:id" element={<PropertyDetailPage />} />
             <Route path="properties/:id/edit" element={<PropertyFormPage />} />
+            {/* P3 — Leasing domain */}
+            <Route path="tenants" element={<TenantsPage />} />
+            <Route path="tenants/new" element={<TenantFormPage />} />
+            <Route path="tenants/:id" element={<TenantDetailPage />} />
+            <Route path="tenants/:id/edit" element={<TenantFormPage />} />
+            <Route path="applications" element={<ApplicationsPage />} />
+            <Route path="applications/new" element={<ApplicationDetailPage />} />
+            <Route path="applications/:id" element={<ApplicationDetailPage />} />
+            <Route path="leases" element={<LeasesPage />} />
+            <Route path="leases/new" element={<LeaseFormPage />} />
+            <Route path="leases/:id" element={<LeaseDetailPage />} />
+            <Route path="inspections" element={<InspectionsPage />} />
             {/* P1 admin placeholders — remaining modules land in P3+ */}
             <Route
               path="users"

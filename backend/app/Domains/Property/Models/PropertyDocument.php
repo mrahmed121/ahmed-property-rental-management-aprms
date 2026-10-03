@@ -18,6 +18,11 @@ class PropertyDocument extends Model
         'property' => Property::class,
         'building' => Building::class,
         'unit' => Unit::class,
+        // P3 — leasing parents
+        'tenant' => \App\Domains\Leasing\Models\Tenant::class,
+        'application' => \App\Domains\Leasing\Models\TenantApplication::class,
+        'lease' => \App\Domains\Leasing\Models\Lease::class,
+        'inspection' => \App\Domains\Leasing\Models\MoveOutInspection::class,
     ];
 
     protected $fillable = [

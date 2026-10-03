@@ -30,6 +30,17 @@ class RolePermissionSeeder extends Seeder
         ['slug' => 'units.manage', 'name' => 'Create/update/archive units', 'group' => 'units'],
         ['slug' => 'documents.view', 'name' => 'View property documents', 'group' => 'documents'],
         ['slug' => 'documents.manage', 'name' => 'Upload/delete property documents', 'group' => 'documents'],
+        // P3 — Leasing domain
+        ['slug' => 'tenants.view', 'name' => 'View tenants', 'group' => 'tenants'],
+        ['slug' => 'tenants.manage', 'name' => 'Create/update/archive tenants', 'group' => 'tenants'],
+        ['slug' => 'applications.view', 'name' => 'View tenant applications', 'group' => 'applications'],
+        ['slug' => 'applications.manage', 'name' => 'Review tenant applications', 'group' => 'applications'],
+        ['slug' => 'screening.view', 'name' => 'View screening records', 'group' => 'screening'],
+        ['slug' => 'screening.manage', 'name' => 'Run screening and KYC decisions', 'group' => 'screening'],
+        ['slug' => 'leases.view', 'name' => 'View leases', 'group' => 'leases'],
+        ['slug' => 'leases.manage', 'name' => 'Create/activate/renew/terminate leases', 'group' => 'leases'],
+        ['slug' => 'inspections.view', 'name' => 'View move-out inspections', 'group' => 'inspections'],
+        ['slug' => 'inspections.manage', 'name' => 'Record/review move-out inspections', 'group' => 'inspections'],
     ];
 
     /**
@@ -38,14 +49,14 @@ class RolePermissionSeeder extends Seeder
      */
     public const ROLE_MATRIX = [
         'super-admin' => ['*'],
-        'agency-admin' => ['dashboard.view', 'users.view', 'users.manage', 'roles.view', 'roles.manage', 'settings.view', 'settings.manage', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage'],
-        'property-manager' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage'],
-        'accountant' => ['dashboard.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view'],
-        'maintenance-supervisor' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view'],
+        'agency-admin' => ['dashboard.view', 'users.view', 'users.manage', 'roles.view', 'roles.manage', 'settings.view', 'settings.manage', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage', 'screening.view', 'screening.manage', 'leases.view', 'leases.manage', 'inspections.view', 'inspections.manage'],
+        'property-manager' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage', 'screening.view', 'screening.manage', 'leases.view', 'leases.manage', 'inspections.view', 'inspections.manage'],
+        'accountant' => ['dashboard.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'screening.view', 'leases.view'],
+        'maintenance-supervisor' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'inspections.view'],
         'technician' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view'],
-        'owner' => ['dashboard.view', 'settings.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view'],
-        'tenant' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view'],
-        'auditor' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view'],
+        'owner' => ['dashboard.view', 'settings.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'leases.view', 'inspections.view'],
+        'tenant' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'leases.view', 'inspections.view'],
+        'auditor' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'screening.view', 'leases.view', 'inspections.view'],
     ];
 
     public const ROLE_NAMES = [

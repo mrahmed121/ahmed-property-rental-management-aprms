@@ -13,6 +13,15 @@ const NAV_GROUPS = [
     items: [{ to: '/properties', label: 'Properties', icon: '🏘️', permission: 'properties.view' }],
   },
   {
+    label: 'Leasing',
+    items: [
+      { to: '/tenants', label: 'Tenants', icon: '🧑‍💼', permission: 'tenants.view' },
+      { to: '/applications', label: 'Applications', icon: '📝', permission: 'applications.view' },
+      { to: '/leases', label: 'Leases', icon: '📄', permission: 'leases.view' },
+      { to: '/inspections', label: 'Inspections', icon: '🔍', permission: 'inspections.view' },
+    ],
+  },
+  {
     label: 'Administration',
     items: [
       { to: '/users', label: 'Users & Roles', icon: '👥', permission: 'users.view' },

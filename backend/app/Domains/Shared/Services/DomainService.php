@@ -15,17 +15,21 @@ use Illuminate\Support\Facades\Auth;
  */
 abstract class DomainService
 {
-    protected ?User $actor;
-
-    public function __construct()
+    /**
+     * The currently authenticated user, resolved lazily per call.
+     * Never capture Auth::user() in a constructor: the container can
+     * outlive a single request (tests, Octane), which would pin the
+     * actor to a previous request's user.
+     */
+    protected function actor(): ?User
     {
-        $this->actor = Auth::user();
+        return Auth::user();
     }
 
     /** The agency all operations are scoped to (null = Super Admin / system). */
     protected function agencyId(): ?int
     {
-        return $this->actor?->agency_id;
+        return $this->actor()?->agency_id;
     }
 
     /**
@@ -34,7 +38,7 @@ abstract class DomainService
      */
     protected function ensureAgencyAccess(?int $agencyId): void
     {
-        $actor = $this->actor;
+        $actor = $this->actor();
 
         if (! $actor || ! $actor->canAccessAgency($agencyId)) {
             abort(403, 'You do not have access to this agency\'s data.');

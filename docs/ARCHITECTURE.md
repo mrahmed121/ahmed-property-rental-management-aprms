@@ -1,6 +1,6 @@
 # APRMS Architecture
 
-> Ahmed Property & Rental Management System — P1 Foundation + P2 Property domain.
+> Ahmed Property & Rental Management System — P1 Foundation + P2 Property domain + P3 Leasing domain.
 > This document describes what is ACTUALLY implemented. Future phases extend it.
 
 ## Stack (deliberate choice)
@@ -67,6 +67,43 @@ API errors are JSON: 401 unauthenticated, 403 missing permission / cross-agency,
   `buildings.create/update/archive/restore`, `units.create/update/archive/restore`,
   `documents.upload/delete`.
 
+## P3 — Leasing domain (implemented)
+- **Chain:** Tenant → Application → Screening/KYC → Lease → Activation →
+  Renewal → Termination → Move-out inspection. Billing stays in P4.
+- **Services:** `TenantService`, `ApplicationService`, `ScreeningService`,
+  `LeaseService` (draft/activate), `LeaseRenewalService`, `LeaseTerminationService`,
+  `MoveOutInspectionService`, `DashboardLeasingMetrics`. Controllers stay thin;
+  FormRequests validate every input.
+- **Concurrency:** activation runs in a DB transaction with `lockForUpdate()` on
+  the unit row; the overlap check runs inside the same transaction, so two
+  simultaneous activations cannot both succeed. A renewal successor may take
+  over only when the occupant is its own predecessor.
+- **Occupancy:** activation sets the unit `occupied` and the tenant `active`;
+  termination/expiry restore `vacant` when no replacement active lease exists.
+  Units in `maintenance`/`inactive` can never activate.
+- **History:** renewal creates a successor (`previous_lease_id`); the original
+  flips to `renewed` on successor activation — never overwritten. Termination
+  requires date + reason + authorized actor; deposit settlement is P4+ (P3 only
+  prepares the inspection record).
+- **Scoping:** `TenantAccess` — tenants see only their own records; owners see
+  leasing data for owned properties; auditors read-only. `PropertyAccess` now
+  links tenants to their leased unit/property. Document parents extended to
+  tenant/application/lease/inspection with matching portfolio rules.
+- **Security:** `national_id` is write-only (returned masked); the actor is
+  resolved lazily per call (`DomainService::actor()`) so long-lived containers
+  never pin a previous request's user.
+- **Dashboard:** adds `total_tenants`, `active_leases`, `leases_expiring_soon`
+  (≤ 60 days), `leases_by_status` — real queries, tenant-scoped for the portal.
+- **Frontend:** `src/modules/leasing/` — tenants, applications (review +
+  screening workflow), leases (activate/renew/terminate + documents),
+  inspections. Sidebar "Leasing" group, permission-gated.
+- P3 audit actions: `tenants.create/update/archive`, `applications.create/update/
+  submitted/under_review/screening_started/screening_decided/approved/rejected`,
+  `leases.create/update/activate/renew/terminate/expired`,
+  `inspections.create/update/reviewed`.
+- Console: `php artisan leases:mark-expired` flips past-due active leases to
+  `expired` and restores vacancy.
+
 ## Multi-tenancy
 - Every agency-owned model uses `BelongsToAgency` → `AgencyScope` global scope.
 - `agency_id = NULL` means platform-level (Super Admin sees all; has no agency settings).
@@ -82,6 +119,11 @@ checks them; the frontend hides nav items via `PermissionGuard` / `hasPermission
 P2 adds 8 property-domain permissions: `properties.view/manage`,
 `buildings.view/manage`, `units.view/manage`, `documents.view/manage` —
 auditor stays read-only, owner/tenant get scoped view rights only.
+P3 adds 10 leasing permissions: `tenants.view/manage`, `applications.view/manage`,
+`screening.view/manage`, `leases.view/manage`, `inspections.view/manage`.
+Agency Admin and Property Manager hold the full set; Accountant gets leasing
+reads; Maintenance Supervisor gets inspection reads; Owner/Tenant get scoped
+reads; Auditor gets all P3 reads; Technician gets none.
 
 ## Audit trail
 Append-only `audit_logs` (no `updated_at`). Single write path: `AuditService::log()`.

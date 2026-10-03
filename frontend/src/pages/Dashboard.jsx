@@ -99,11 +99,50 @@ export default function Dashboard() {
       </PermissionGuard>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <EmptyState
-          icon="👥"
-          title="No tenants yet"
-          hint="Tenant onboarding ships with the leasing module in P3. This panel will show active tenancies and upcoming renewals."
-        />
+        <PermissionGuard permission="tenants.view" showForbidden={false}>
+          <div className="aprms-card">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400">Leasing</h3>
+              <Link to="/leases" className="text-xs text-gold hover:text-gold-light">Open leases →</Link>
+            </div>
+            {loading ? (
+              <div className="mt-3"><Spinner /></div>
+            ) : (
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                <div>
+                  <p className="text-2xl font-bold text-slate-100">{stats?.total_tenants ?? 0}</p>
+                  <p className="text-xs text-slate-500">Tenants</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gold">{stats?.active_leases ?? 0}</p>
+                  <p className="text-xs text-slate-500">Active leases</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-100">{stats?.leases_expiring_soon ?? 0}</p>
+                  <p className="text-xs text-slate-500">Expiring ≤ 60 days</p>
+                </div>
+              </div>
+            )}
+            {!loading && (stats?.total_tenants || 0) === 0 && (
+              <p className="mt-3 text-sm text-slate-500">
+                No tenants yet — add tenants as they apply, then run applications and leases from the Leasing menu.
+              </p>
+            )}
+            {!loading && Object.keys(stats?.leases_by_status || {}).length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-charcoal-700/60 pt-3">
+                {Object.entries(stats.leases_by_status || {}).map(([status, count]) => (
+                  <span
+                    key={status}
+                    className="inline-flex items-center gap-2 rounded-full bg-charcoal-800 px-3 py-1.5 text-sm text-slate-200 ring-1 ring-charcoal-700"
+                  >
+                    <span className="capitalize text-slate-400">{status}</span>
+                    <span className="font-bold text-gold">{count}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </PermissionGuard>
         <PermissionGuard permission="reports.view" showForbidden={false}>
           <EmptyState
             icon="📊"
