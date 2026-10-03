@@ -173,3 +173,25 @@ timestamps.
   `reversed`, invoices `void`ed, each with a compensating ledger entry.
 - Invoice creation, payment posting, allocation, and late-fee accrual
   all run inside transactions with row locks.
+
+### P5 tables
+
+| Table | Purpose | Key constraints |
+|-------|---------|-----------------|
+| `deposits` | Security deposit per lease | `UNIQUE(agency_id, lease_id)`; status in required/held/partially_released/settled/closed |
+| `deposit_transactions` | Append-only history | indexed `(agency_id, deposit_id)`; type in received/increase/adjustment/deduction/refund/applied |
+| `deposit_deductions` | Proposed/approved deductions | indexed `(agency_id, deposit_id, status)`; assessment wear/damage |
+| `deposit_settlements` | Final settlement | `UNIQUE(agency_id, deposit_id)` (no double settlement); status draft/finalized |
+| `maintenance_tickets` | Work orders (MT-…) | `UNIQUE(agency_id, ticket_number)`; indexed status/priority/assigned/sla_due_at |
+| `maintenance_quotes` | Estimates awaiting approval | indexed `(agency_id, ticket_id, status)`; attribution owner/tenant |
+| `maintenance_work_logs` | Technician work history | indexed `(agency_id, ticket_id)` |
+| `maintenance_verifications` | Verification records | `UNIQUE(agency_id, ticket_id)` |
+| `maintenance_vendors` | Agency vendors | indexed `(agency_id, status)` |
+
+### P5 integrity rules
+
+- `deposits.deposit_amount ≤ 3 × lease.monthly_rent` (server-enforced).
+- Settlement: `refund = gross − deductions − applied`; deductions + applied ≤ gross; no negative balances.
+- `deposit_transactions` are append-only; settlements are reversed, never hard-deleted.
+- Ticket status transitions follow the `TRANSITIONS` map; invalid moves are rejected.
+- Quotes must be approved before work proceeds; verification is required before closure.

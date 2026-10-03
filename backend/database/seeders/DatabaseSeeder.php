@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             PropertySeeder::class,
             LeasingSeeder::class,
             BillingSeeder::class,
+            DepositSeeder::class,
+            MaintenanceSeeder::class,
         ]);
     }
 }

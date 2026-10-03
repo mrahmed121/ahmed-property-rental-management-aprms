@@ -54,6 +54,18 @@ class RolePermissionSeeder extends Seeder
         ['slug' => 'receipts.view', 'name' => 'View/download receipts', 'group' => 'billing'],
         ['slug' => 'periods.manage', 'name' => 'Lock/unlock financial periods', 'group' => 'billing'],
         ['slug' => 'billing.adjust', 'name' => 'Apply adjustments and waive fees', 'group' => 'billing'],
+        // P5 — Deposits
+        ['slug' => 'deposits.view', 'name' => 'View deposits', 'group' => 'deposits'],
+        ['slug' => 'deposits.manage', 'name' => 'Create/receive/adjust deposits', 'group' => 'deposits'],
+        ['slug' => 'deposits.settle', 'name' => 'Propose deductions and finalize settlements', 'group' => 'deposits'],
+        // P5 — Maintenance
+        ['slug' => 'maintenance.view', 'name' => 'View maintenance tickets', 'group' => 'maintenance'],
+        ['slug' => 'maintenance.report', 'name' => 'Report maintenance issues', 'group' => 'maintenance'],
+        ['slug' => 'maintenance.triage', 'name' => 'Triage and assign tickets', 'group' => 'maintenance'],
+        ['slug' => 'maintenance.work', 'name' => 'Quote, log work and complete tickets', 'group' => 'maintenance'],
+        ['slug' => 'maintenance.approve', 'name' => 'Approve quotes and verify work', 'group' => 'maintenance'],
+        ['slug' => 'vendors.view', 'name' => 'View vendors', 'group' => 'maintenance'],
+        ['slug' => 'vendors.manage', 'name' => 'Manage vendors', 'group' => 'maintenance'],
     ];
 
     /**
@@ -62,14 +74,14 @@ class RolePermissionSeeder extends Seeder
      */
     public const ROLE_MATRIX = [
         'super-admin' => ['*'],
-        'agency-admin' => ['dashboard.view', 'users.view', 'users.manage', 'roles.view', 'roles.manage', 'settings.view', 'settings.manage', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage', 'screening.view', 'screening.manage', 'leases.view', 'leases.manage', 'inspections.view', 'inspections.manage', 'billing.view', 'invoices.view', 'invoices.generate', 'payments.view', 'payments.record', 'payments.reverse', 'ledger.view', 'dunning.view', 'dunning.manage', 'receipts.view', 'periods.manage', 'billing.adjust'],
-        'property-manager' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage', 'screening.view', 'screening.manage', 'leases.view', 'leases.manage', 'inspections.view', 'inspections.manage', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'dunning.view', 'receipts.view'],
-        'accountant' => ['dashboard.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'screening.view', 'leases.view', 'billing.view', 'invoices.view', 'invoices.generate', 'payments.view', 'payments.record', 'payments.reverse', 'ledger.view', 'dunning.view', 'dunning.manage', 'receipts.view', 'billing.adjust'],
-        'maintenance-supervisor' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'inspections.view'],
-        'technician' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view'],
-        'owner' => ['dashboard.view', 'settings.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'leases.view', 'inspections.view', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'receipts.view'],
-        'tenant' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'leases.view', 'inspections.view', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'receipts.view'],
-        'auditor' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'screening.view', 'leases.view', 'inspections.view', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'dunning.view', 'receipts.view'],
+        'agency-admin' => ['dashboard.view', 'users.view', 'users.manage', 'roles.view', 'roles.manage', 'settings.view', 'settings.manage', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage', 'screening.view', 'screening.manage', 'leases.view', 'leases.manage', 'inspections.view', 'inspections.manage', 'billing.view', 'invoices.view', 'invoices.generate', 'payments.view', 'payments.record', 'payments.reverse', 'ledger.view', 'dunning.view', 'dunning.manage', 'receipts.view', 'periods.manage', 'billing.adjust', 'deposits.view', 'deposits.manage', 'deposits.settle', 'maintenance.view', 'maintenance.report', 'maintenance.triage', 'maintenance.work', 'maintenance.approve', 'vendors.view', 'vendors.manage'],
+        'property-manager' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'properties.manage', 'buildings.view', 'buildings.manage', 'units.view', 'units.manage', 'documents.view', 'documents.manage', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage', 'screening.view', 'screening.manage', 'leases.view', 'leases.manage', 'inspections.view', 'inspections.manage', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'dunning.view', 'receipts.view', 'deposits.view', 'deposits.manage', 'deposits.settle', 'maintenance.view', 'maintenance.report', 'maintenance.triage', 'maintenance.work', 'maintenance.approve', 'vendors.view', 'vendors.manage'],
+        'accountant' => ['dashboard.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'screening.view', 'leases.view', 'billing.view', 'invoices.view', 'invoices.generate', 'payments.view', 'payments.record', 'payments.reverse', 'ledger.view', 'dunning.view', 'dunning.manage', 'receipts.view', 'billing.adjust', 'deposits.view', 'maintenance.view', 'vendors.view'],
+        'maintenance-supervisor' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'inspections.view', 'maintenance.view', 'maintenance.report', 'maintenance.triage', 'maintenance.work', 'maintenance.approve', 'vendors.view', 'vendors.manage'],
+        'technician' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'maintenance.view', 'maintenance.work'],
+        'owner' => ['dashboard.view', 'settings.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'leases.view', 'inspections.view', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'receipts.view', 'deposits.view', 'maintenance.view', 'maintenance.report'],
+        'tenant' => ['dashboard.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'leases.view', 'inspections.view', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'receipts.view', 'deposits.view', 'maintenance.view', 'maintenance.report'],
+        'auditor' => ['dashboard.view', 'users.view', 'settings.view', 'audit.view', 'reports.view', 'properties.view', 'buildings.view', 'units.view', 'documents.view', 'tenants.view', 'applications.view', 'screening.view', 'leases.view', 'inspections.view', 'billing.view', 'invoices.view', 'payments.view', 'ledger.view', 'dunning.view', 'receipts.view', 'deposits.view', 'maintenance.view', 'vendors.view'],
     ];
 
     public const ROLE_NAMES = [

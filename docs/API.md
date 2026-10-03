@@ -135,3 +135,38 @@ All financial amounts are in PKR (₨). Every number is database-backed.
 | GET | `/financial/periods` | `billing.view` | Period list |
 | POST | `/financial/periods/lock` | `periods.manage` | Lock a past period |
 | POST | `/financial/periods/unlock` | `periods.manage` | Unlock |
+
+## P5 — Deposits + Maintenance
+
+### Deposits
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|------------|-------------|
+| GET | `/deposits` | `deposits.view` | List (tenant/owner scoped) |
+| POST | `/deposits` | `deposits.manage` | Create (3× rent cap enforced) |
+| GET | `/deposits/{id}` | `deposits.view` | Detail with transactions/deductions/settlement |
+| POST | `/deposits/{id}/receive` | `deposits.manage` | Record receipt |
+| POST | `/deposits/{id}/adjust` | `deposits.manage` | Adjust agreed amount (cap still applies) |
+| POST | `/deposits/{id}/deductions` | `deposits.settle` | Propose deduction (reason required) |
+| POST | `/deposits/deductions/{id}/review` | `deposits.settle` | Approve/reject deduction |
+| POST | `/deposits/{id}/settlement/draft` | `deposits.settle` | Draft (requires reviewed inspection) |
+| POST | `/deposits/{id}/settlement/preview` | `deposits.settle` | Deterministic preview |
+| POST | `/deposits/{id}/settlement/finalize` | `deposits.settle` | Finalize and lock |
+| POST | `/deposits/{id}/settlement/reverse` | `deposits.settle` | Reverse (correction path) |
+
+### Maintenance
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|------------|-------------|
+| GET | `/maintenance/tickets` | `maintenance.view` | List (tech/tenant/owner scoped) |
+| POST | `/maintenance/tickets` | `maintenance.report` | Create ticket (SLA auto-set) |
+| GET | `/maintenance/tickets/{id}` | `maintenance.view` | Detail with quotes/logs/verification |
+| POST | `/maintenance/tickets/{id}/transition` | `maintenance.triage` | Status transition (machine-enforced) |
+| POST | `/maintenance/tickets/{id}/assign` | `maintenance.triage` | Assign to technician |
+| POST | `/maintenance/tickets/{id}/quotes` | `maintenance.work` | Submit quote (attribution reason required) |
+| POST | `/maintenance/quotes/{id}/decide` | `maintenance.approve` | Approve/reject quote |
+| POST | `/maintenance/tickets/{id}/work-logs` | `maintenance.work` | Log work |
+| POST | `/maintenance/tickets/{id}/verify` | `maintenance.approve` | Verify (passed/failed) |
+| GET | `/maintenance/vendors` | `vendors.view` | Vendor list (agency-scoped) |
+| POST | `/maintenance/vendors` | `vendors.manage` | Create vendor |
+| GET | `/maintenance/dashboard` | `maintenance.view` | Real metrics |

@@ -7,12 +7,25 @@ property managers: properties, leases, rent collection, deposits, maintenance,
 expenses, owner statements, and reports — with strict multi-agency isolation,
 role-based access, and a full audit trail.
 
-**Status: P4 Billing (money-in) — implemented and verified.**
-140 backend tests pass (840 assertions) · 29 frontend tests pass.
-P5+ domain modules (Maintenance billing, Reporting, owner statements) are
-documented contracts; their business logic lands in their own phases.
+**Status: P5 Deposits + Maintenance — implemented and verified.**
+169 backend tests pass (1,085 assertions) · 35 frontend tests pass.
+P6+ domain modules (Reporting, owner statements) are documented contracts;
+their business logic lands in their own phases.
 
-### P4 Billing / money-in (current)
+### P5 Deposits + Maintenance (current)
+Real deposit lifecycle: deposit ≤ 3× monthly rent (server-enforced cap);
+held amounts with append-only transaction history (no hard deletes);
+wear-vs-damage deductions with required reasons and approval;
+final settlement locked behind a reviewed move-out inspection
+(refund = gross − approved deductions − applied to balance);
+applied amounts flow through the P4 tenant ledger; finalized
+settlements are immutable (reversal only). Complete maintenance
+workflow: tickets (MT-…) → triage → assign → quote → approve →
+work → complete → verify → close, with SLA tracking by priority,
+vendor management, cost attribution (owner/tenant with reason),
+and query-backed dashboards.
+
+### P4 Billing / money-in
 Real financial subsystem: rent invoices (INV-…) generated from active
 leases via an idempotent monthly rent cycle with mid-month proration;
 payments (RCPT-…) recorded with idempotency keys and allocated through a

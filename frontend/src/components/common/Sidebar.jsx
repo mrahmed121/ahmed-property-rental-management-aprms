@@ -32,6 +32,20 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Deposits',
+    items: [
+      { to: '/deposits', label: 'Deposits', icon: '🔐', permission: 'deposits.view' },
+    ],
+  },
+  {
+    label: 'Maintenance',
+    items: [
+      { to: '/maintenance', label: 'Overview', icon: '🔧', permission: 'maintenance.view' },
+      { to: '/maintenance/tickets', label: 'Tickets', icon: '🎫', permission: 'maintenance.view' },
+      { to: '/maintenance/vendors', label: 'Vendors', icon: '🏭', permission: 'vendors.view' },
+    ],
+  },
+  {
     label: 'Administration',
     items: [
       { to: '/users', label: 'Users & Roles', icon: '👥', permission: 'users.view' },

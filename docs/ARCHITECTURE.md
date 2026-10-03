@@ -199,3 +199,36 @@ through adjustments/reversals.
 `barryvdh/laravel-dompdf` added for receipt PDFs. The pre-existing
 `laravel/framework` advisories remain documented with `policy: false`
 (see above); dompdf introduces no new advisories at install time.
+
+## P5 — Deposits domain
+
+Four tables: `deposits`, `deposit_transactions` (append-only),
+`deposit_deductions`, `deposit_settlements`. One deposit per lease
+(UNIQUE). Cap: `deposit_amount ≤ 3 × monthly_rent`, enforced
+server-side in `DepositService`; invalid amounts are rejected, never
+silently modified.
+
+Settlement math is deterministic:
+`refund = gross − approved_deductions − applied_to_balance`.
+Deductions need an approved reason (no arbitrary deductions);
+wear vs damage is a structured field. Final settlement requires a
+reviewed move-out inspection. Applied amounts flow through the P4
+`TenantLedgerService` (no second money system). Finalized settlements
+are immutable; corrections use `reverse()` which restores the held
+amount and reverses the ledger credit. Concurrency: row locks on the
+deposit; UNIQUE(agency_id, deposit_id) on settlements prevents double
+finalization.
+
+## P5 — Maintenance domain
+
+Tables: `maintenance_tickets` (MT-… numbering), `maintenance_quotes`,
+`maintenance_work_logs`, `maintenance_verifications`,
+`maintenance_vendors`. Status machine enforced via
+`MaintenanceTicket::TRANSITIONS` — impossible transitions return 422.
+SLA: priority → hours (urgent 4h, high 24h, normal 72h, low 7d);
+`isBreached()` excludes closed/cancelled/verified. Quotes require
+approval before work (no auto-approval); cost attribution is
+owner|tenant with a required reason. Verification is required before
+`verified`/`closed`. Technicians see only assigned tickets; tenants see
+only their own; owners see owned properties. All agency-scoped.
+Documents reuse `property_documents` with the `ticket` parent type.

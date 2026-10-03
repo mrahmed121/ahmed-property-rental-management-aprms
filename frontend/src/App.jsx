@@ -29,6 +29,16 @@ import LedgerPage from './modules/billing/pages/LedgerPage';
 import ArrearsPage from './modules/billing/pages/ArrearsPage';
 import DunningPage from './modules/billing/pages/DunningPage';
 import FinancialDashboardPage from './modules/billing/pages/FinancialDashboardPage';
+// P5 — Deposits domain
+import DepositsPage from './modules/deposits/pages/DepositsPage';
+import DepositFormPage from './modules/deposits/pages/DepositFormPage';
+import DepositDetailPage from './modules/deposits/pages/DepositDetailPage';
+// P5 — Maintenance domain
+import TicketsPage from './modules/maintenance/pages/TicketsPage';
+import TicketFormPage from './modules/maintenance/pages/TicketFormPage';
+import TicketDetailPage from './modules/maintenance/pages/TicketDetailPage';
+import VendorsPage from './modules/maintenance/pages/VendorsPage';
+import MaintenanceDashboardPage from './modules/maintenance/pages/MaintenanceDashboardPage';
 
 function Placeholder({ title, hint }) {
   return (
@@ -78,6 +88,17 @@ export default function App() {
             <Route path="billing/ledger/:tenantId" element={<LedgerPage />} />
             <Route path="billing/arrears" element={<ArrearsPage />} />
             <Route path="billing/dunning" element={<DunningPage />} />
+            {/* P5 — Deposits domain */}
+            <Route path="deposits" element={<DepositsPage />} />
+            <Route path="deposits/new" element={<DepositFormPage />} />
+            <Route path="deposits/:id" element={<DepositDetailPage />} />
+            {/* P5 — Maintenance domain */}
+            <Route path="maintenance" element={<MaintenanceDashboardPage />} />
+            <Route path="maintenance/dashboard" element={<MaintenanceDashboardPage />} />
+            <Route path="maintenance/tickets" element={<TicketsPage />} />
+            <Route path="maintenance/tickets/new" element={<TicketFormPage />} />
+            <Route path="maintenance/tickets/:id" element={<TicketDetailPage />} />
+            <Route path="maintenance/vendors" element={<VendorsPage />} />
             {/* P1 admin placeholders — remaining modules land in P3+ */}
             <Route
               path="users"

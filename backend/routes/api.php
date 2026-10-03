@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\DepositController;
 use App\Http\Controllers\Api\V1\DunningController;
 use App\Http\Controllers\Api\V1\FinancialController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\LedgerController;
+use App\Http\Controllers\Api\V1\MaintenanceController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ReceiptController;
 use App\Http\Controllers\Api\V1\BuildingController;
@@ -151,5 +153,32 @@ Route::prefix('v1')->group(function () {
         Route::get('financial/periods', [FinancialController::class, 'periods'])->middleware('permission:billing.view');
         Route::post('financial/periods/lock', [FinancialController::class, 'lockPeriod'])->middleware('permission:periods.manage');
         Route::post('financial/periods/unlock', [FinancialController::class, 'unlockPeriod'])->middleware('permission:periods.manage');
+
+        // P5 — Deposits
+        Route::get('deposits', [DepositController::class, 'index'])->middleware('permission:deposits.view');
+        Route::post('deposits', [DepositController::class, 'store'])->middleware('permission:deposits.manage');
+        Route::get('deposits/{deposit}', [DepositController::class, 'show'])->middleware('permission:deposits.view');
+        Route::post('deposits/{deposit}/receive', [DepositController::class, 'receive'])->middleware('permission:deposits.manage');
+        Route::post('deposits/{deposit}/adjust', [DepositController::class, 'adjust'])->middleware('permission:deposits.manage');
+        Route::post('deposits/{deposit}/deductions', [DepositController::class, 'proposeDeduction'])->middleware('permission:deposits.settle');
+        Route::post('deposits/deductions/{deduction}/review', [DepositController::class, 'reviewDeduction'])->middleware('permission:deposits.settle');
+        Route::post('deposits/{deposit}/settlement/draft', [DepositController::class, 'draftSettlement'])->middleware('permission:deposits.settle');
+        Route::post('deposits/{deposit}/settlement/preview', [DepositController::class, 'previewSettlement'])->middleware('permission:deposits.settle');
+        Route::post('deposits/{deposit}/settlement/finalize', [DepositController::class, 'finalizeSettlement'])->middleware('permission:deposits.settle');
+        Route::post('deposits/{deposit}/settlement/reverse', [DepositController::class, 'reverseSettlement'])->middleware('permission:deposits.settle');
+
+        // P5 — Maintenance
+        Route::get('maintenance/tickets', [MaintenanceController::class, 'index'])->middleware('permission:maintenance.view');
+        Route::post('maintenance/tickets', [MaintenanceController::class, 'store'])->middleware('permission:maintenance.report');
+        Route::get('maintenance/tickets/{ticket}', [MaintenanceController::class, 'show'])->middleware('permission:maintenance.view');
+        Route::post('maintenance/tickets/{ticket}/transition', [MaintenanceController::class, 'transition'])->middleware('permission:maintenance.triage');
+        Route::post('maintenance/tickets/{ticket}/assign', [MaintenanceController::class, 'assign'])->middleware('permission:maintenance.triage');
+        Route::post('maintenance/tickets/{ticket}/quotes', [MaintenanceController::class, 'createQuote'])->middleware('permission:maintenance.work');
+        Route::post('maintenance/quotes/{quote}/decide', [MaintenanceController::class, 'decideQuote'])->middleware('permission:maintenance.approve');
+        Route::post('maintenance/tickets/{ticket}/work-logs', [MaintenanceController::class, 'logWork'])->middleware('permission:maintenance.work');
+        Route::post('maintenance/tickets/{ticket}/verify', [MaintenanceController::class, 'verify'])->middleware('permission:maintenance.approve');
+        Route::get('maintenance/vendors', [MaintenanceController::class, 'vendors'])->middleware('permission:vendors.view');
+        Route::post('maintenance/vendors', [MaintenanceController::class, 'createVendor'])->middleware('permission:vendors.manage');
+        Route::get('maintenance/dashboard', [MaintenanceController::class, 'dashboard'])->middleware('permission:maintenance.view');
     });
 });
