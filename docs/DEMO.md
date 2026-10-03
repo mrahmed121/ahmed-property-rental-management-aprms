@@ -41,6 +41,7 @@ Overview of properties, units, occupancy, and financial position. All metrics ar
 ### 9. Owner Statements (P7)
 - Log in as `owner@ahmedestates.local` to see the owner-scoped view.
 - As admin: **Statements → Generate** — preview the reconciliation, then generate.
+  - Note: management fee uses the agency's `management_fee_percent` setting (default 10% if unset).
 - Walk the statement through review → approved → finalized. Download the PDF.
 
 ## Cross-Cutting Demos
