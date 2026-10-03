@@ -15,7 +15,7 @@ const STYLES = {
 
 export default function StatusBadge({ value }) {
   const style = STYLES[value] || 'bg-slate-500/15 text-slate-300 ring-slate-500/40';
-  const label = String(value || '').replace(/-/g, ' ');
+  const label = String(value || '').replace(/[-_]/g, ' ');
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ring-1 ${style}`}

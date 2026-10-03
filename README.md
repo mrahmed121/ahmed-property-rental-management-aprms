@@ -2,65 +2,98 @@
 
 > **Ahmed — Own Every Square Foot.**
 
-A professional property & rental management platform for owners, agencies, and
-property managers: properties, leases, rent collection, deposits, maintenance,
-expenses, owner statements, and reports — with strict multi-agency isolation,
-role-based access, and a full audit trail.
+[![Laravel](https://img.shields.io/badge/Laravel-11-red)](https://laravel.com)
+[![React](https://img.shields.io/badge/React-18-blue)](https://react.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PHP](https://img.shields.io/badge/PHP-8.3-777bb4)](https://php.net)
 
-**Status: P7 Owner Statements — implemented and verified.**
-169 backend tests pass (1,085 assertions) · 35 frontend tests pass.
-P6+ domain modules (Reporting, owner statements) are documented contracts;
-their business logic lands in their own phases.
+A professional property & rental management platform for owners, agencies, and property managers. APRMS handles the full rental lifecycle — properties, tenants, leases, rent collection, deposits, maintenance, utilities, expenses, and owner statements — with strict multi-agency isolation, role-based access control, and a complete audit trail.
 
-### P7 Owner Statements (current)
-
-- Owner statements from real P4/P5/P6 data: accrual income, management fees, expenses, maintenance, utility absorption.
-- Deterministic reconciliation; traceable statement lines; adjustments; approval/finalization; period locking.
-- PDF statements with Ahmed branding; owner portfolio, profitability, and trend reports.
-
-### P6 Utilities + Expenses
-
-- Utility meters (property/building/unit), monotonic readings, consumption calculation.
-- Utility billing: deterministic `total = consumption × rate + fixed + tax`; shared-utility allocation (metered/equal/area/custom); vacant-unit shares absorbed by owner as distinct line items.
-- Tenant utility charges post through the P4 ledger and participate in the payment waterfall.
-- Property expenses: draft → submitted → approved/rejected → posted → reversed, with segregation of duties; reuses P5 vendors and the document system; never touches the tenant ledger.
-
-### P5 Deposits + Maintenance
-Real deposit lifecycle: deposit ≤ 3× monthly rent (server-enforced cap);
-held amounts with append-only transaction history (no hard deletes);
-wear-vs-damage deductions with required reasons and approval;
-final settlement locked behind a reviewed move-out inspection
-(refund = gross − approved deductions − applied to balance);
-applied amounts flow through the P4 tenant ledger; finalized
-settlements are immutable (reversal only). Complete maintenance
-workflow: tickets (MT-…) → triage → assign → quote → approve →
-work → complete → verify → close, with SLA tracking by priority,
-vendor management, cost attribution (owner/tenant with reason),
-and query-backed dashboards.
-
-### P4 Billing / money-in
-Real financial subsystem: rent invoices (INV-…) generated from active
-leases via an idempotent monthly rent cycle with mid-month proration;
-payments (RCPT-…) recorded with idempotency keys and allocated through a
-fixed waterfall (late fees → utilities → current rent → oldest arrears);
-derived tenant ledger (no hand-edited balances); late fees from agency
-settings with caps; dunning reminders (day 3/7/15/30); PDF receipts;
-financial period locking; payment reversal (never hard-delete).
-
-### P3 Leasing
-Full tenancy lifecycle: tenants → applications → screening/KYC → leases →
-activation → renewal → termination → move-out inspections. Unit occupancy
-updates automatically; overlapping active leases are rejected inside a
-row-locked transaction; archive is blocked while active leases exist.
+**Status:** All 7 phases implemented and verified. 211 backend tests pass (1,349 assertions) · 49 frontend tests pass.
 
 ---
 
-## Tech Stack
-- **Backend:** Laravel 11 (PHP 8.3), JWT auth (`tymon/jwt-auth`), SQLite (MySQL/PG-ready)
-- **Frontend:** React 18, Vite 6, Tailwind CSS 3, React Router 6
-- **API:** versioned under `/api/v1`, JSON everywhere
+## Executive Overview
 
-## Quick Start
+APRMS is a multi-tenant SaaS-style platform where agencies manage properties on behalf of owners. Every financial record flows through a single ledger architecture:
+
+- **Money in** (P4): rent invoices → payments → allocation waterfall → tenant ledger
+- **Money held** (P5): deposits with 3× rent cap, deductions, settlements
+- **Money out** (P6): property expenses, utility billing with owner absorption
+- **Owner reporting** (P7): accrual-based statements with deterministic reconciliation
+
+Nine roles (Super Admin → Technician) with granular permissions. Agency isolation enforced at the application layer — cross-agency access returns 404.
+
+## Key Features
+
+### P1 — Foundation
+JWT authentication, 9 roles with granular permissions, agency isolation, append-only audit logs, settings, user management.
+
+### P2 — Property Domain
+Properties, buildings, units, private documents (agency-scoped storage), archive/restore (no hard deletes), owner portfolio scoping, real dashboard metrics.
+
+### P3 — Leasing Domain
+Tenants, applications, screening/KYC, lease lifecycle (draft → active → renewed/terminated), move-out inspections, document integration.
+
+### P4 — Billing & Collections
+Rent invoices, payment recording, allocation waterfall (late fees → utilities → current rent → oldest arrears), tenant ledger, late fees, dunning reminders, receipts (PDF), financial periods with locking.
+
+### P5 — Deposits & Maintenance
+Deposits with server-enforced 3× rent cap, append-only transactions, wear-vs-damage deductions, settlements behind reviewed inspections. Maintenance tickets (MT-YYYY-NNNN) with SLA tracking, quotes with owner/tenant attribution, work logs, verification, vendors.
+
+### P6 — Utilities & Expenses
+Utility meters with monotonic readings, deterministic billing (`total = consumption × rate + fixed + tax`), shared-utility allocation, vacant-unit owner absorption. Expense workflow (draft → submitted → approved → posted) with segregation of duties. Tenant utility charges flow through the P4 ledger.
+
+### P7 — Owner Statements
+Accrual-based statements from real P4/P5/P6 data. Management fees, traceable statement lines, deterministic reconciliation, adjustments, approval/finalization, period locking, PDF statements, portfolio/profitability/trend reports.
+
+## Design System
+
+- **Charcoal** `#12161d` — primary background
+- **Ahmed Gold** `#d4af37` — accents, brand
+- **Copper** `#b87333` — secondary accents
+
+## Demo Credentials
+
+All demo accounts use password `password123`. For local development and demo only.
+
+| Role | Email | Scope |
+|------|-------|-------|
+| Agency Admin | `admin@ahmedestates.local` | Full agency access |
+| Property Manager | `manager@ahmedestates.local` | Operational |
+| Accountant | `accountant@ahmedestates.local` | Financial |
+| Owner | `owner@ahmedestates.local` | Own properties only |
+| Tenant | `tenant@ahmedestates.local` | Own lease only |
+| Auditor | `auditor@ahmedestates.local` | Read-only |
+
+## Architecture
+
+```
+backend/
+  app/Domains/          # Domain-oriented vertical slices
+    Shared/             # Users, roles, agencies, audit, settings
+    Property/           # P2: properties, buildings, units, documents
+    Leasing/            # P3: tenants, applications, leases, inspections
+    Billing/            # P4: invoices, payments, ledger, dunning
+    Deposits/           # P5: deposits, settlements
+    Maintenance/        # P5: tickets, quotes, vendors
+    Utilities/          # P6: meters, readings, bills
+    Expenses/           # P6: expenses
+    Statements/         # P7: owner statements, periods, reports
+  app/Http/Controllers/Api/V1/  # Thin controllers, 142 endpoints
+frontend/
+  src/modules/          # Feature modules (property, leasing, billing, ...)
+  src/components/       # Shared UI (DataTable, StatusBadge, PermissionGuard)
+```
+
+**Principles:** Domain services own business logic. Controllers are thin. No second ledgers — P7 consumes P4/P5/P6 records. Financial tables use restrictive deletes, never hard-delete posted history.
+
+## Getting Started
+
+### Prerequisites
+- PHP 8.3+, Composer
+- Node.js 18+, npm
+- SQLite (default) or MySQL/PostgreSQL
 
 ### Backend
 ```bash
@@ -68,70 +101,79 @@ cd backend
 composer install
 cp .env.example .env
 php artisan key:generate
-php artisan jwt:secret
-touch database/database.sqlite
 php artisan migrate --seed
-php artisan serve          # http://127.0.0.1:8000
+php artisan serve --port=8001
 ```
 
 ### Frontend
 ```bash
 cd frontend
 npm install
-npm run dev                # http://localhost:5173 (proxies /api → :8000)
+npm run dev
 ```
 
-### Demo credentials (seeded, local development only)
-| Email | Role | Agency |
-|---|---|---|
-| `super@aprms.local` | Super Admin | — (platform) |
-| `admin@ahmedestates.local` | Agency Admin | Ahmed Estates |
-| `manager@ahmedestates.local` | Property Manager | Ahmed Estates |
-| `accountant@ahmedestates.local` | Accountant | Ahmed Estates |
-| `auditor@ahmedestates.local` | Auditor (read-only) | Ahmed Estates |
-| `admin@secondagency.local` | Agency Admin | Second Agency |
+Open http://localhost:5173 and log in with a demo account.
 
-Password for all demo users: `password123`
+### Windows Launcher
+`RUN_APRMS.bat` starts both backend and frontend (requires PHP, Composer, and Node.js installed and on PATH).
 
-## API Overview
-| Method | Path | Description |
-|---|---|---|
-| GET | `/api/v1/health` | Service + DB status |
-| POST | `/api/v1/auth/login` | Issue JWT |
-| POST | `/api/v1/auth/logout` | Blacklist JWT |
-| GET | `/api/v1/me` | Current user, roles, permissions |
-| GET/POST | `/api/v1/users` | List (scoped) / create |
-| GET/PUT/DELETE | `/api/v1/users/{id}` | Scoped; cross-agency → 404 |
-| GET/POST/PUT | `/api/v1/roles`, `/api/v1/permissions` | RBAC management |
-| GET/PUT | `/api/v1/settings` | Agency-scoped typed settings |
-| GET | `/api/v1/audit-logs` | Read-only audit trail |
-| GET | `/api/v1/dashboard/stats` | Real portfolio counts (properties, buildings, units, vacant/occupied) |
-| GET/POST | `/api/v1/properties` | List (search/filter/sort/paginate) / create |
-| GET/PUT/DELETE | `/api/v1/properties/{id}` | Detail / update / archive (cascades) |
-| POST | `/api/v1/properties/{id}/restore` | Restore with archived children |
-| GET/POST | `/api/v1/buildings` | List / create under a property |
-| GET/PUT/DELETE | `/api/v1/buildings/{id}` | Detail / update / archive |
-| GET/POST | `/api/v1/units` | List / create under a building |
-| GET/PUT/DELETE | `/api/v1/units/{id}` | Detail / update / archive |
-| GET/POST | `/api/v1/documents` | List / multipart upload (≤ 10 MB) |
-| GET | `/api/v1/documents/{id}/download` | Authenticated file stream |
-| DELETE | `/api/v1/documents/{id}` | Delete record + file |
+## Environment
 
-Full reference: [`docs/API.md`](docs/API.md) · Architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · Schema: [`docs/DATABASE.md`](docs/DATABASE.md)
+| Variable | Description |
+|----------|-------------|
+| `DB_CONNECTION` | `sqlite` (default), `mysql`, or `pgsql` |
+| `JWT_SECRET` | Secret for JWT signing (generate with `php artisan jwt:secret`) |
+
+See `backend/.env.example` and `frontend/.env.example` for the full list.
+
+## Project Structure
+
+```
+aprms/
+  backend/          # Laravel 11 API
+  frontend/         # React 18 SPA (Vite + Tailwind)
+  docs/             # API, architecture, database, deployment, security, demo
+  docs/screenshots/ # Real application screenshots
+  RUN_APRMS.bat     # Windows launcher
+```
+
+## Tech Stack
+
+- **Backend:** Laravel 11, PHP 8.3, tymon/jwt-auth, barryvdh/laravel-dompdf, SQLite/MySQL/PostgreSQL
+- **Frontend:** React 18, Vite, Tailwind CSS, React Router, Vitest
+- **Testing:** PHPUnit (backend), Vitest + Testing Library (frontend)
 
 ## Testing
+
 ```bash
-cd backend && php artisan test     # 79 passed, 323 assertions
-cd frontend && npm test -- --run   # 14 passed (auth + property workflows)
+# Backend (211 tests, 1349 assertions)
+cd backend && php artisan test
+
+# Frontend (49 tests)
+cd frontend && npm test -- --run
+
+# Production build
+cd frontend && npm run build
 ```
 
-## Security Notes
-- Passwords bcrypt-hashed; JWT blacklisted on logout; permission middleware on every route.
-- Agency isolation enforced at query (global scope), service (403 guard), and API (404, no existence leak) layers — all covered by tests.
-- Composer advisory policy is disabled (`"config": {"policy": false}`) because all Laravel 11.x carry advisories with no patched release; each advisory's mitigation is documented in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+## Documentation
+
+- [API Reference](docs/API.md) — all 142 endpoints
+- [Architecture](docs/ARCHITECTURE.md) — domain design, financial model
+- [Database](docs/DATABASE.md) — schema reference
+- [Deployment](docs/DEPLOYMENT.md) — production setup
+- [Security](docs/SECURITY.md) — security model and review
+- [Demo Guide](docs/DEMO.md) — repeatable demo flow
+- [Changelog](CHANGELOG.md) — phase-by-phase history
+
+## Contributing
+
+This is Ahmed's portfolio project. Issues and suggestions are welcome.
 
 ## License
+
 MIT — see [LICENSE](LICENSE).
 
 ---
-<p align="center">Developed by Ahmed</p>
+
+**Developed by Ahmed.**
