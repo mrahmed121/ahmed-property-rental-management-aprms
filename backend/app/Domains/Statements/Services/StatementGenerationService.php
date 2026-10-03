@@ -4,15 +4,12 @@ namespace App\Domains\Statements\Services;
 
 use App\Domains\Billing\Models\TenantLedgerEntry;
 use App\Domains\Expenses\Models\Expense;
-use App\Domains\Leasing\Models\Lease;
 use App\Domains\Maintenance\Models\MaintenanceQuote;
 use App\Domains\Property\Models\Property;
 use App\Domains\Shared\Models\Setting;
 use App\Domains\Shared\Models\User;
 use App\Domains\Shared\Services\DomainService;
 use App\Domains\Statements\Models\OwnerStatement;
-use App\Domains\Statements\Models\StatementAdjustment;
-use App\Domains\Statements\Models\StatementLine;
 use App\Domains\Statements\Models\StatementPeriod;
 use App\Domains\Utilities\Models\UtilityAllocation;
 use Illuminate\Support\Facades\DB;

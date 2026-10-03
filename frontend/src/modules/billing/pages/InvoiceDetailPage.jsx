@@ -5,7 +5,7 @@ import PermissionGuard from '../../../components/common/PermissionGuard';
 import Spinner from '../../../components/common/Spinner';
 import StatusBadge from '../../property/components/StatusBadge';
 import ConfirmDialog from '../../property/components/ConfirmDialog';
-import { invoiceApi, paymentApi, formatPKR, billingErrorMessage } from '../services/billingApi';
+import { invoiceApi, formatPKR, billingErrorMessage } from '../services/billingApi';
 
 function Row({ label, children }) {
   return (

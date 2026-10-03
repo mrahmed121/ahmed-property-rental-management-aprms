@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import {useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import PermissionGuard from '../../../components/common/PermissionGuard';
-import Spinner from '../../../components/common/Spinner';
 import DataTable from '../../property/components/DataTable';
 import { vendorApi, maintenanceErrorMessage } from '../services/maintenanceApi';
 

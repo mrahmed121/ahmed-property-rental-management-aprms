@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import {useParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import PermissionGuard from '../../../components/common/PermissionGuard';
 import StatusBadge from '../../property/components/StatusBadge';

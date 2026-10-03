@@ -6,7 +6,6 @@ use App\Domains\Billing\Models\RentInvoice;
 use App\Domains\Leasing\Models\Lease;
 use App\Domains\Shared\Services\DomainService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 /**
  * RentCycleService — monthly rent invoice generation.

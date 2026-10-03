@@ -133,15 +133,15 @@ export default function App() {
             {/* P1 admin placeholders — remaining modules land in P3+ */}
             <Route
               path="users"
-              element={<Placeholder title="Users & Roles" hint="User administration UI arrives with the P2 build. API is live at /api/v1/users." />}
+              element={<Placeholder title="Users & Roles" hint="User management is available via the API at /api/v1/users." />}
             />
             <Route
               path="audit-logs"
-              element={<Placeholder title="Audit Logs" hint="The audit trail viewer ships in P2. Entries are already being recorded by the API." />}
+              element={<Placeholder title="Audit Logs" hint="Audit entries are recorded by the API and viewable via /api/v1/audit-logs." />}
             />
             <Route
               path="settings"
-              element={<Placeholder title="Settings" hint="Agency settings UI ships in P2. The settings API is live at /api/v1/settings." />}
+              element={<Placeholder title="Settings" hint="Agency settings are available via the API at /api/v1/settings." />}
             />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

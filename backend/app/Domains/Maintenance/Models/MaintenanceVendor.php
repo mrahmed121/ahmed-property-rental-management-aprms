@@ -2,7 +2,6 @@
 
 namespace App\Domains\Maintenance\Models;
 
-use App\Domains\Shared\Models\User;
 use App\Domains\Shared\Traits\BelongsToAgency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

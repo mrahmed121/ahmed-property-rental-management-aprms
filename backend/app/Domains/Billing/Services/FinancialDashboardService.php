@@ -6,7 +6,6 @@ use App\Domains\Billing\Models\Payment;
 use App\Domains\Billing\Models\RentInvoice;
 use App\Domains\Leasing\Services\TenantAccess;
 use App\Domains\Shared\Services\DomainService;
-use Illuminate\Support\Facades\DB;
 
 /**
  * FinancialDashboardService — REAL query-backed money metrics.

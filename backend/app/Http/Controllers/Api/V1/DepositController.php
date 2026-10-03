@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Domains\Deposits\Models\Deposit;
 use App\Domains\Deposits\Models\DepositDeduction;
-use App\Domains\Deposits\Models\DepositSettlement;
 use App\Domains\Deposits\Services\DepositService;
 use App\Domains\Deposits\Services\DepositSettlementService;
 use App\Domains\Leasing\Models\Lease;

@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domains\Maintenance\Models\MaintenanceQuote;
-use App\Domains\Maintenance\Models\MaintenanceTicket;
-use App\Domains\Maintenance\Models\MaintenanceVendor;
 use App\Domains\Maintenance\Services\MaintenanceDashboardService;
 use App\Domains\Maintenance\Services\MaintenanceService;
 use App\Domains\Maintenance\Services\MaintenanceWorkflowService;

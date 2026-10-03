@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "ahmed/aprms",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Ahmed Property & Rental Management System (APRMS) \u2014 Laravel 11 API",
     "keywords": [
         "laravel",
         "framework"

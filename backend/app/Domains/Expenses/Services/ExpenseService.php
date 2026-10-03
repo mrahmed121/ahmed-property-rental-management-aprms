@@ -3,7 +3,6 @@
 namespace App\Domains\Expenses\Services;
 
 use App\Domains\Expenses\Models\Expense;
-use App\Domains\Leasing\Services\TenantAccess;
 use App\Domains\Maintenance\Models\MaintenanceVendor;
 use App\Domains\Property\Models\Property;
 use App\Domains\Shared\Services\DomainService;

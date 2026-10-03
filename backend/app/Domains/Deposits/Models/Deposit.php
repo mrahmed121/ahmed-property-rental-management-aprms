@@ -3,7 +3,6 @@
 namespace App\Domains\Deposits\Models;
 
 use App\Domains\Leasing\Models\Lease;
-use App\Domains\Leasing\Models\MoveOutInspection;
 use App\Domains\Leasing\Models\Tenant;
 use App\Domains\Property\Models\Property;
 use App\Domains\Property\Models\Unit;

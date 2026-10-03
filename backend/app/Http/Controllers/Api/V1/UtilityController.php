@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Domains\Utilities\Models\UtilityBill;
-use App\Domains\Utilities\Models\UtilityMeter;
 use App\Domains\Utilities\Services\UtilityBillingService;
 use App\Domains\Utilities\Services\UtilityMeterService;
 use App\Http\Controllers\Controller;

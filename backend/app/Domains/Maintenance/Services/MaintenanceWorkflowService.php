@@ -221,9 +221,4 @@ class MaintenanceWorkflowService extends DomainService
 
         return $vendor;
     }
-
-    public function ensureVendorAccess(MaintenanceVendor $vendor): void
-    {
-        $this->ensureAgencyAccess($vendor->agency_id);
-    }
 }

@@ -6,7 +6,6 @@ use App\Domains\Billing\Models\LateFee;
 use App\Domains\Billing\Models\Payment;
 use App\Domains\Billing\Models\PaymentAllocation;
 use App\Domains\Billing\Models\RentInvoice;
-use App\Domains\Leasing\Models\Tenant;
 use App\Domains\Shared\Services\DomainService;
 use Illuminate\Support\Facades\DB;
 
