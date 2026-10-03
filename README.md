@@ -7,12 +7,18 @@ property managers: properties, leases, rent collection, deposits, maintenance,
 expenses, owner statements, and reports — with strict multi-agency isolation,
 role-based access, and a full audit trail.
 
-**Status: P6 Utilities + Expenses — implemented and verified.**
+**Status: P7 Owner Statements — implemented and verified.**
 169 backend tests pass (1,085 assertions) · 35 frontend tests pass.
 P6+ domain modules (Reporting, owner statements) are documented contracts;
 their business logic lands in their own phases.
 
-### P6 Utilities + Expenses (current)
+### P7 Owner Statements (current)
+
+- Owner statements from real P4/P5/P6 data: accrual income, management fees, expenses, maintenance, utility absorption.
+- Deterministic reconciliation; traceable statement lines; adjustments; approval/finalization; period locking.
+- PDF statements with Ahmed branding; owner portfolio, profitability, and trend reports.
+
+### P6 Utilities + Expenses
 
 - Utility meters (property/building/unit), monotonic readings, consumption calculation.
 - Utility billing: deterministic `total = consumption × rate + fixed + tax`; shared-utility allocation (metered/equal/area/custom); vacant-unit shares absorbed by owner as distinct line items.

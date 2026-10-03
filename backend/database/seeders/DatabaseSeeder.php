@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             DepositSeeder::class,
             MaintenanceSeeder::class,
             UtilityExpenseSeeder::class,
+            StatementSeeder::class,
         ]);
     }
 }

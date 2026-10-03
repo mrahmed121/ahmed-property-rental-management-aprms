@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\DunningController;
 use App\Http\Controllers\Api\V1\FinancialController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\LedgerController;
+use App\Http\Controllers\Api\V1\OwnerStatementController;
 use App\Http\Controllers\Api\V1\UtilityController;
 use App\Http\Controllers\Api\V1\ExpenseController;
 use App\Http\Controllers\Api\V1\MaintenanceController;
@@ -205,5 +206,20 @@ Route::prefix('v1')->group(function () {
         Route::get('expenses/{expense}', [ExpenseController::class, 'show'])->middleware('permission:expenses.view');
         Route::post('expenses/{expense}/transition', [ExpenseController::class, 'transition'])->middleware('permission:expenses.create');
         Route::post('expenses/{expense}/reverse', [ExpenseController::class, 'reverse'])->middleware('permission:expenses.reverse');
+
+        // P7 — Owner statements
+        Route::get('statement-periods', [OwnerStatementController::class, 'indexPeriods'])->middleware('permission:statements.view');
+        Route::post('statement-periods', [OwnerStatementController::class, 'storePeriod'])->middleware('permission:statements.generate');
+        Route::post('statement-periods/{period}/lock', [OwnerStatementController::class, 'lockPeriod'])->middleware('permission:statements.finalize');
+        Route::get('owner-statements', [OwnerStatementController::class, 'index'])->middleware('permission:statements.view');
+        Route::post('owner-statements/preview', [OwnerStatementController::class, 'preview'])->middleware('permission:statements.generate');
+        Route::post('owner-statements', [OwnerStatementController::class, 'generate'])->middleware('permission:statements.generate');
+        Route::get('owner-statements/{statement}', [OwnerStatementController::class, 'show'])->middleware('permission:statements.view');
+        Route::post('owner-statements/{statement}/transition', [OwnerStatementController::class, 'transition'])->middleware('permission:statements.review');
+        Route::post('owner-statements/{statement}/adjust', [OwnerStatementController::class, 'adjust'])->middleware('permission:statements.adjust');
+        Route::get('owner-statements/{statement}/pdf', [OwnerStatementController::class, 'pdf'])->middleware('permission:statements.view');
+        Route::get('owner-reports/portfolio', [OwnerStatementController::class, 'portfolio'])->middleware('permission:owner-reports.view');
+        Route::get('owner-reports/profitability', [OwnerStatementController::class, 'profitability'])->middleware('permission:owner-reports.view');
+        Route::get('owner-reports/trend', [OwnerStatementController::class, 'trend'])->middleware('permission:owner-reports.view');
     });
 });

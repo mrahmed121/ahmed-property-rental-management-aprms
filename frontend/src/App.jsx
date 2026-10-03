@@ -47,6 +47,11 @@ import ExpensesPage from './modules/expenses/pages/ExpensesPage';
 import ExpenseFormPage from './modules/expenses/pages/ExpenseFormPage';
 import ExpenseDetailPage from './modules/expenses/pages/ExpenseDetailPage';
 import ExpenseApprovalsPage from './modules/expenses/pages/ExpenseApprovalsPage';
+import StatementsPage from './modules/statements/pages/StatementsPage';
+import StatementDetailPage from './modules/statements/pages/StatementDetailPage';
+import StatementGeneratePage from './modules/statements/pages/StatementGeneratePage';
+import StatementReviewPage from './modules/statements/pages/StatementReviewPage';
+import OwnerReportsPage from './modules/statements/pages/OwnerReportsPage';
 import MeterFormPage from './modules/utilities/pages/MeterFormPage';
 
 function Placeholder({ title, hint }) {
@@ -119,6 +124,12 @@ export default function App() {
             <Route path="expenses/new" element={<ExpenseFormPage />} />
             <Route path="expenses/approvals" element={<ExpenseApprovalsPage />} />
             <Route path="expenses/:id" element={<ExpenseDetailPage />} />
+            {/* P7 — Owner statements domain */}
+            <Route path="statements" element={<StatementsPage />} />
+            <Route path="statements/generate" element={<StatementGeneratePage />} />
+            <Route path="statements/review" element={<StatementReviewPage />} />
+            <Route path="statements/reports" element={<OwnerReportsPage />} />
+            <Route path="statements/:id" element={<StatementDetailPage />} />
             {/* P1 admin placeholders — remaining modules land in P3+ */}
             <Route
               path="users"

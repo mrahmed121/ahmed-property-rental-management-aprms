@@ -60,6 +60,13 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Owner Statements',
+    items: [
+      { to: '/statements', label: 'Statements', icon: '📊', permission: 'statements.view' },
+      { to: '/statements/reports', label: 'Owner Reports', icon: '📈', permission: 'owner-reports.view' },
+    ],
+  },
+  {
     label: 'Administration',
     items: [
       { to: '/users', label: 'Users & Roles', icon: '👥', permission: 'users.view' },

@@ -208,3 +208,25 @@ All financial amounts are in PKR (₨). Every number is database-backed.
 | GET | `/expenses/summary` | `expenses.view` | Real metrics |
 
 **Workflow:** `draft → submitted → approved/rejected → posted → (reversed)`. Segregation: submitters cannot approve their own expense (except agency-admin/super-admin). Posted expenses are immutable. Expenses are money-out on the property/owner side — they NEVER post to the tenant rent ledger.
+
+## P7 — Owner Statements
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|------------|-------------|
+| GET | `/statement-periods` | `statements.view` | List periods |
+| POST | `/statement-periods` | `statements.generate` | Create period |
+| POST | `/statement-periods/{id}/lock` | `statements.finalize` | Lock period (all statements must be finalized) |
+| GET | `/owner-statements` | `statements.view` | List (owner sees own only) |
+| POST | `/owner-statements/preview` | `statements.generate` | Preview calculation (no writes) |
+| POST | `/owner-statements` | `statements.generate` | Generate (idempotent per owner+period) |
+| GET | `/owner-statements/{id}` | `statements.view` | Detail with lines + adjustments |
+| POST | `/owner-statements/{id}/transition` | varies | `review`/`draft` (review), `approved` (approve), `finalized` (finalize) |
+| POST | `/owner-statements/{id}/adjust` | `statements.adjust` | Add adjustment (blocked when finalized) |
+| GET | `/owner-statements/{id}/pdf` | `statements.view` | Download PDF statement |
+| GET | `/owner-reports/portfolio` | `owner-reports.view` | Portfolio summary |
+| GET | `/owner-reports/profitability` | `owner-reports.view` | Property profitability |
+| GET | `/owner-reports/trend` | `owner-reports.view` | Monthly net trend |
+
+**Income basis:** ACCRUAL. Income = P4 tenant-ledger `invoice` debits (rent charged) for the owner's properties in the period. Payments are credits, not income — no double-counting.
+**Management fee:** `management_fee_percent` agency setting (default 10%) × gross income. Documented on the statement.
+**Reconciliation:** `net = income − fee − expenses − maintenance − utility + adjustments` (deterministic, recomputed from lines).

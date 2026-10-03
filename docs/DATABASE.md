@@ -212,3 +212,17 @@ Agency/property/building/unit linkage, `meter_number` (unique per agency), `util
 
 ### `expenses`
 Agency/property/building/unit, `vendor_id` (→ `maintenance_vendors`), `expense_number` (EXP-YYYY-NNNNNN, unique per agency), `category` (maintenance/utilities/repairs/cleaning/security/tax_fee/insurance/management/supplies/other), `description`, `expense_date`, `amount`, `currency` (PKR), `status` (draft/submitted/approved/rejected/posted/reversed), `submitted_by`/`approved_by`/`approved_at`/`posted_at`, notes. Documents via polymorphic `expense` parent on `property_documents`.
+
+## P7 Tables
+
+### `statement_periods`
+`agency_id`, `start_date`, `end_date`, `status` (open/review/approved/finalized/locked), `locked_by`, `locked_at`. UNIQUE(`agency_id`, `start_date`, `end_date`).
+
+### `owner_statements`
+`agency_id`, `statement_period_id`, `owner_id` (→ users), `statement_number` (STMT-YYYY-NNNNNN, unique per agency), `currency` (PKR), `status` (draft/review/approved/finalized), `gross_income`, `management_fee_percent`, `management_fee`, `owner_expenses`, `owner_maintenance`, `owner_utility_absorption`, `adjustments_total`, `net_amount`, `generated_by`/`approved_by`/`approved_at`/`finalized_by`/`finalized_at`. UNIQUE(`agency_id`, `owner_id`, `statement_period_id`).
+
+### `statement_lines`
+`owner_statement_id`, `line_type` (income/management_fee/expense/maintenance/utility/adjustment), polymorphic `source` (ledger entry, expense, quote, allocation, adjustment), `property_id`, `unit_id`, `description`, `line_date`, signed `amount`, `reference`. Every number traceable.
+
+### `statement_adjustments`
+`owner_statement_id`, signed `amount`, `reason`, `created_by`. Audited; blocked on finalized statements.

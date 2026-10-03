@@ -255,3 +255,19 @@ Documents reuse `property_documents` with the `ticket` parent type.
 - **Vendors:** reuses P5 `maintenance_vendors` (no duplicate table). **Documents:** reuses property-document system with `expense` parent.
 - **Concurrency:** `lockForUpdate()` on transitions/reversals; posted expenses immutable.
 - **Permissions:** `expenses.view/create/approve/post/reverse`. Tenants and technicians have no access; auditors read-only.
+
+## P7 — Owner Statements Architecture
+
+### Statements domain (`app/Domains/Statements/`)
+
+- **Models:** `StatementPeriod`, `OwnerStatement`, `StatementLine`, `StatementAdjustment` — all `BelongsToAgency`.
+- **Services:**
+  - `StatementGenerationService` — preview/generate. Consumes P4 ledger (income), P6 expenses, P5 quotes (maintenance), P6 allocations (utility). No second ledger.
+  - `StatementWorkflowService` — transitions, adjustments, recalculation, period locking. Finalized statements immutable.
+  - `OwnerReportingService` — portfolio, profitability, trend. All query-backed.
+- **Statement numbering:** `STMT-{year}-{seq}` (agency-scoped).
+- **Workflow:** `draft → review → approved → finalized`; period `open → review → approved → finalized → locked`.
+- **Concurrency:** `lockForUpdate()` on generation/finalize/adjust/lock; UNIQUE(agency, owner, period); idempotent generate.
+- **Double-count guards:** income uses invoice debits only; maintenance quotes skip when matched to a posted expense (same vendor+amount±7 days); tenant-attributed costs and tenant utility charges excluded.
+- **PDF:** `barryvdh/laravel-dompdf` with `resources/views/statements/owner-statement.blade.php` (Ahmed branding, no fabricated signatures).
+- **Permissions:** `statements.view/generate/review/approve/finalize/adjust`, `owner-reports.view`. Owners see own only; tenants/technicians none; auditors read-only.
