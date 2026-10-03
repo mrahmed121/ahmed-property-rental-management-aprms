@@ -46,6 +46,20 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Utilities',
+    items: [
+      { to: '/utilities/meters', label: 'Meters', icon: '⚡', permission: 'utilities.view' },
+      { to: '/utilities/bills', label: 'Bills', icon: '🧾', permission: 'utilities.view' },
+    ],
+  },
+  {
+    label: 'Expenses',
+    items: [
+      { to: '/expenses', label: 'Expenses', icon: '💸', permission: 'expenses.view' },
+      { to: '/expenses/approvals', label: 'Approvals', icon: '✅', permission: 'expenses.approve' },
+    ],
+  },
+  {
     label: 'Administration',
     items: [
       { to: '/users', label: 'Users & Roles', icon: '👥', permission: 'users.view' },

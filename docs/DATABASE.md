@@ -195,3 +195,20 @@ timestamps.
 - `deposit_transactions` are append-only; settlements are reversed, never hard-deleted.
 - Ticket status transitions follow the `TRANSITIONS` map; invalid moves are rejected.
 - Quotes must be approved before work proceeds; verification is required before closure.
+
+## P6 Tables
+
+### `utility_meters`
+Agency/property/building/unit linkage, `meter_number` (unique per agency), `utility_type` (electricity/gas/water/other), `unit_of_measure`, `status` (active/inactive), `installation_date`, `opening_reading`, notes.
+
+### `meter_readings`
+`meter_id`, `reading_date`, `reading_value`, `recorded_by`, `source` (manual/import/estimate), notes. UNIQUE(`meter_id`, `reading_date`) prevents duplicates. History is append-only.
+
+### `utility_bills`
+`meter_id`, property/building/unit, `tenant_id`/`lease_id` (auto-resolved from active lease), `bill_number` (UB-YYYY-NNNNNN, unique per agency), `period_start`/`period_end`, `previous_reading`, `current_reading`, `consumption`, `rate`, `fixed_charge`, `tax_amount`, `total`, `currency` (PKR), `status` (draft/finalized/reversed), `allocation_method`, `created_by`/`finalized_by`/`finalized_at`. UNIQUE(`agency_id`, `meter_id`, `period_start`) prevents duplicate finalized bills.
+
+### `utility_allocations`
+`utility_bill_id`, `unit_id`, `tenant_id`, `allocation_type` (metered/equal_split/area_based/custom/vacant_owner), `consumption_share`, `amount`. `vacant_owner` lines = owner-absorbed, never tenant-charged.
+
+### `expenses`
+Agency/property/building/unit, `vendor_id` (→ `maintenance_vendors`), `expense_number` (EXP-YYYY-NNNNNN, unique per agency), `category` (maintenance/utilities/repairs/cleaning/security/tax_fee/insurance/management/supplies/other), `description`, `expense_date`, `amount`, `currency` (PKR), `status` (draft/submitted/approved/rejected/posted/reversed), `submitted_by`/`approved_by`/`approved_at`/`posted_at`, notes. Documents via polymorphic `expense` parent on `property_documents`.

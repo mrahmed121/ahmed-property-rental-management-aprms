@@ -39,6 +39,15 @@ import TicketFormPage from './modules/maintenance/pages/TicketFormPage';
 import TicketDetailPage from './modules/maintenance/pages/TicketDetailPage';
 import VendorsPage from './modules/maintenance/pages/VendorsPage';
 import MaintenanceDashboardPage from './modules/maintenance/pages/MaintenanceDashboardPage';
+import MetersPage from './modules/utilities/pages/MetersPage';
+import MeterDetailPage from './modules/utilities/pages/MeterDetailPage';
+import UtilityBillsPage from './modules/utilities/pages/UtilityBillsPage';
+import UtilityBillDetailPage from './modules/utilities/pages/UtilityBillDetailPage';
+import ExpensesPage from './modules/expenses/pages/ExpensesPage';
+import ExpenseFormPage from './modules/expenses/pages/ExpenseFormPage';
+import ExpenseDetailPage from './modules/expenses/pages/ExpenseDetailPage';
+import ExpenseApprovalsPage from './modules/expenses/pages/ExpenseApprovalsPage';
+import MeterFormPage from './modules/utilities/pages/MeterFormPage';
 
 function Placeholder({ title, hint }) {
   return (
@@ -99,6 +108,17 @@ export default function App() {
             <Route path="maintenance/tickets/new" element={<TicketFormPage />} />
             <Route path="maintenance/tickets/:id" element={<TicketDetailPage />} />
             <Route path="maintenance/vendors" element={<VendorsPage />} />
+            {/* P6 — Utilities domain */}
+            <Route path="utilities/meters" element={<MetersPage />} />
+            <Route path="utilities/meters/new" element={<MeterFormPage />} />
+            <Route path="utilities/meters/:id" element={<MeterDetailPage />} />
+            <Route path="utilities/bills" element={<UtilityBillsPage />} />
+            <Route path="utilities/bills/:id" element={<UtilityBillDetailPage />} />
+            {/* P6 — Expenses domain */}
+            <Route path="expenses" element={<ExpensesPage />} />
+            <Route path="expenses/new" element={<ExpenseFormPage />} />
+            <Route path="expenses/approvals" element={<ExpenseApprovalsPage />} />
+            <Route path="expenses/:id" element={<ExpenseDetailPage />} />
             {/* P1 admin placeholders — remaining modules land in P3+ */}
             <Route
               path="users"

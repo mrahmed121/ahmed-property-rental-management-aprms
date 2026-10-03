@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             BillingSeeder::class,
             DepositSeeder::class,
             MaintenanceSeeder::class,
+            UtilityExpenseSeeder::class,
         ]);
     }
 }

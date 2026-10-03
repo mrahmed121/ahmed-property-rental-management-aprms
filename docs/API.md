@@ -170,3 +170,41 @@ All financial amounts are in PKR (₨). Every number is database-backed.
 | GET | `/maintenance/vendors` | `vendors.view` | Vendor list (agency-scoped) |
 | POST | `/maintenance/vendors` | `vendors.manage` | Create vendor |
 | GET | `/maintenance/dashboard` | `maintenance.view` | Real metrics |
+
+## P6 — Utilities + Expenses
+
+### Utilities
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|------------|-------------|
+| GET | `/utility/meters` | `utilities.view` | List (tenant/owner scoped) |
+| POST | `/utility/meters` | `utilities.manage` | Register meter |
+| GET | `/utility/meters/{id}` | `utilities.view` | Detail with readings/bills |
+| GET | `/utility/meters/{id}/readings` | `utilities.view` | Reading history |
+| POST | `/utility/meters/{id}/readings` | `utilities.manage` | Record reading (monotonic, no duplicates) |
+| POST | `/utility/meters/{id}/consumption` | `utilities.view` | Consumption calculation |
+| GET | `/utility/bills` | `utilities.view` | List (tenant/owner scoped) |
+| POST | `/utility/meters/{id}/bills/preview` | `utilities.bill` | Preview (no writes) |
+| POST | `/utility/meters/{id}/bills` | `utilities.bill` | Generate draft bill |
+| GET | `/utility/bills/{id}` | `utilities.view` | Detail with allocations |
+| POST | `/utility/bills/{id}/allocate` | `utilities.bill` | Replace allocations (must sum to total) |
+| POST | `/utility/bills/{id}/finalize` | `utilities.bill` | Finalize (posts tenant charges to P4 ledger) |
+| POST | `/utility/bills/{id}/reverse` | `utilities.adjust` | Reverse (correction path) |
+
+**Reading rules:** non-negative, monotonic increase, no duplicate (meter, date), historical readings never overwritten.
+**Billing math:** `total = consumption × rate + fixed_charge + tax` (deterministic).
+**Allocation:** `metered` (default), `equal_split`, `area_based`, `custom`. Vacant-unit shares use `vacant_owner` — absorbed by owner as a distinct line item, never hidden, never charged to a tenant.
+**Ledger:** finalized tenant allocations post through the P4 `TenantLedgerService` as `utility` entries, participating in the payment waterfall (late fees → utilities → current rent → oldest arrears). Owner-absorbed lines never touch the tenant ledger.
+
+### Expenses
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|------------|-------------|
+| GET | `/expenses` | `expenses.view` | List (owner scoped) |
+| POST | `/expenses` | `expenses.create` | Create (draft) |
+| GET | `/expenses/{id}` | `expenses.view` | Detail with documents |
+| POST | `/expenses/{id}/transition` | varies | `submitted` (create), `approved`/`rejected` (approve), `posted` (post), `draft` (create) |
+| POST | `/expenses/{id}/reverse` | `expenses.reverse` | Reverse posted (correction path) |
+| GET | `/expenses/summary` | `expenses.view` | Real metrics |
+
+**Workflow:** `draft → submitted → approved/rejected → posted → (reversed)`. Segregation: submitters cannot approve their own expense (except agency-admin/super-admin). Posted expenses are immutable. Expenses are money-out on the property/owner side — they NEVER post to the tenant rent ledger.

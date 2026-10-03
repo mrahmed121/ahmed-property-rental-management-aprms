@@ -25,6 +25,8 @@ class PropertyDocument extends Model
         'inspection' => \App\Domains\Leasing\Models\MoveOutInspection::class,
         // P5 — maintenance parent
         'ticket' => \App\Domains\Maintenance\Models\MaintenanceTicket::class,
+        // P6 — expense parent
+        'expense' => \App\Domains\Expenses\Models\Expense::class,
     ];
 
     protected $fillable = [

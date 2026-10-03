@@ -7,12 +7,19 @@ property managers: properties, leases, rent collection, deposits, maintenance,
 expenses, owner statements, and reports — with strict multi-agency isolation,
 role-based access, and a full audit trail.
 
-**Status: P5 Deposits + Maintenance — implemented and verified.**
+**Status: P6 Utilities + Expenses — implemented and verified.**
 169 backend tests pass (1,085 assertions) · 35 frontend tests pass.
 P6+ domain modules (Reporting, owner statements) are documented contracts;
 their business logic lands in their own phases.
 
-### P5 Deposits + Maintenance (current)
+### P6 Utilities + Expenses (current)
+
+- Utility meters (property/building/unit), monotonic readings, consumption calculation.
+- Utility billing: deterministic `total = consumption × rate + fixed + tax`; shared-utility allocation (metered/equal/area/custom); vacant-unit shares absorbed by owner as distinct line items.
+- Tenant utility charges post through the P4 ledger and participate in the payment waterfall.
+- Property expenses: draft → submitted → approved/rejected → posted → reversed, with segregation of duties; reuses P5 vendors and the document system; never touches the tenant ledger.
+
+### P5 Deposits + Maintenance
 Real deposit lifecycle: deposit ≤ 3× monthly rent (server-enforced cap);
 held amounts with append-only transaction history (no hard deletes);
 wear-vs-damage deductions with required reasons and approval;

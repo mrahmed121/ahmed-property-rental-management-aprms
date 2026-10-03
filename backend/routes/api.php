@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\V1\DunningController;
 use App\Http\Controllers\Api\V1\FinancialController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\LedgerController;
+use App\Http\Controllers\Api\V1\UtilityController;
+use App\Http\Controllers\Api\V1\ExpenseController;
 use App\Http\Controllers\Api\V1\MaintenanceController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ReceiptController;
@@ -180,5 +182,28 @@ Route::prefix('v1')->group(function () {
         Route::get('maintenance/vendors', [MaintenanceController::class, 'vendors'])->middleware('permission:vendors.view');
         Route::post('maintenance/vendors', [MaintenanceController::class, 'createVendor'])->middleware('permission:vendors.manage');
         Route::get('maintenance/dashboard', [MaintenanceController::class, 'dashboard'])->middleware('permission:maintenance.view');
+
+        // P6 — Utilities
+        Route::get('utility/meters', [UtilityController::class, 'indexMeters'])->middleware('permission:utilities.view');
+        Route::post('utility/meters', [UtilityController::class, 'storeMeter'])->middleware('permission:utilities.manage');
+        Route::get('utility/meters/{meter}', [UtilityController::class, 'showMeter'])->middleware('permission:utilities.view');
+        Route::get('utility/meters/{meter}/readings', [UtilityController::class, 'indexReadings'])->middleware('permission:utilities.view');
+        Route::post('utility/meters/{meter}/readings', [UtilityController::class, 'storeReading'])->middleware('permission:utilities.manage');
+        Route::post('utility/meters/{meter}/consumption', [UtilityController::class, 'consumption'])->middleware('permission:utilities.view');
+        Route::get('utility/bills', [UtilityController::class, 'indexBills'])->middleware('permission:utilities.view');
+        Route::post('utility/meters/{meter}/bills/preview', [UtilityController::class, 'previewBill'])->middleware('permission:utilities.bill');
+        Route::post('utility/meters/{meter}/bills', [UtilityController::class, 'generateBill'])->middleware('permission:utilities.bill');
+        Route::get('utility/bills/{bill}', [UtilityController::class, 'showBill'])->middleware('permission:utilities.view');
+        Route::post('utility/bills/{bill}/allocate', [UtilityController::class, 'allocateBill'])->middleware('permission:utilities.bill');
+        Route::post('utility/bills/{bill}/finalize', [UtilityController::class, 'finalizeBill'])->middleware('permission:utilities.bill');
+        Route::post('utility/bills/{bill}/reverse', [UtilityController::class, 'reverseBill'])->middleware('permission:utilities.adjust');
+
+        // P6 — Expenses
+        Route::get('expenses', [ExpenseController::class, 'index'])->middleware('permission:expenses.view');
+        Route::post('expenses', [ExpenseController::class, 'store'])->middleware('permission:expenses.create');
+        Route::get('expenses/summary', [ExpenseController::class, 'summary'])->middleware('permission:expenses.view');
+        Route::get('expenses/{expense}', [ExpenseController::class, 'show'])->middleware('permission:expenses.view');
+        Route::post('expenses/{expense}/transition', [ExpenseController::class, 'transition'])->middleware('permission:expenses.create');
+        Route::post('expenses/{expense}/reverse', [ExpenseController::class, 'reverse'])->middleware('permission:expenses.reverse');
     });
 });

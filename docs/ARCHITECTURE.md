@@ -232,3 +232,26 @@ owner|tenant with a required reason. Verification is required before
 `verified`/`closed`. Technicians see only assigned tickets; tenants see
 only their own; owners see owned properties. All agency-scoped.
 Documents reuse `property_documents` with the `ticket` parent type.
+
+## P6 — Utilities + Expenses Architecture
+
+### Utilities domain (`app/Domains/Utilities/`)
+
+- **Models:** `UtilityMeter`, `MeterReading`, `UtilityBill`, `UtilityAllocation` — all `BelongsToAgency`.
+- **Services:**
+  - `UtilityMeterService` — meters, readings, consumption. Enforces monotonic readings, duplicate prevention, tenant/owner scoping.
+  - `UtilityBillingService` — bill generation, allocation, finalization, reversal. Tenant charges post via P4 `TenantLedgerService` (no second ledger).
+- **Bill numbering:** `UB-{year}-{seq}` (agency-scoped, deterministic).
+- **Concurrency:** `lockForUpdate()` on meter (reading/bill generation) and bill (finalize/reverse/allocate); UNIQUE(agency_id, meter_id, period_start); idempotent finalize.
+- **Permissions:** `utilities.view/manage/bill/adjust`. Tenants see own unit meters/bills; owners see own properties; technicians see nothing; auditors read-only.
+
+### Expenses domain (`app/Domains/Expenses/`)
+
+- **Model:** `Expense` — `BelongsToAgency`, state machine via `TRANSITIONS`.
+- **Service:** `ExpenseService` — create, transition (permission-checked per target state), reverse, summary metrics.
+- **Expense numbering:** `EXP-{year}-{seq}` (agency-scoped).
+- **Workflow:** `draft → submitted → approved/rejected → posted → reversed`. Segregation of duties enforced: non-admins cannot approve their own submissions.
+- **Financial boundary:** expenses are property/owner-side money-out. They NEVER post to the P4 tenant ledger. Architecture prepares `property income − expenses − owner-attributable costs` inputs for P7 owner statements (not built).
+- **Vendors:** reuses P5 `maintenance_vendors` (no duplicate table). **Documents:** reuses property-document system with `expense` parent.
+- **Concurrency:** `lockForUpdate()` on transitions/reversals; posted expenses immutable.
+- **Permissions:** `expenses.view/create/approve/post/reverse`. Tenants and technicians have no access; auditors read-only.
