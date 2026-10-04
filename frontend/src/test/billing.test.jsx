@@ -3,6 +3,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
+vi.mock('../api/client', async () => {
+  const m = await import('../services/api');
+  return m;
+});
+
 vi.mock('../services/api', () => {
   const get = vi.fn();
   const post = vi.fn();
@@ -33,7 +38,7 @@ const ADMIN = {
 
 function mockApi(overrides = {}) {
   api.get.mockImplementation((url) => {
-    if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
     if (overrides[url]) return Promise.resolve(overrides[url]);
     return Promise.reject(new Error(`unexpected GET ${url}`));
   });
@@ -226,7 +231,7 @@ describe('Billing permission guards', () => {
   it('hides record-payment for viewers without payments.record', async () => {
     const viewer = { ...ADMIN, permissions: ['payments.view'] };
     api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: viewer } });
+      if (url === '/auth/me') return Promise.resolve({ data: { user: viewer } });
       if (url === '/payments') {
         return Promise.resolve({ data: { data: [], meta: { total: 0 } } });
       }

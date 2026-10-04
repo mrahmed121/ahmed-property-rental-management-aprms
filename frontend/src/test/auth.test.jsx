@@ -3,6 +3,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
+vi.mock('../api/client', async () => {
+  const m = await import('../services/api');
+  return m;
+});
+
 vi.mock('../services/api', () => {
   const post = vi.fn();
   const get = vi.fn();

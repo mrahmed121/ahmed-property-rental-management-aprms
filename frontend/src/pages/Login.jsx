@@ -1,93 +1,120 @@
 import { useState } from 'react';
-import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import Spinner from '../components/common/Spinner';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import Button from '../shared/Button';
+import ErrorAlert from '../shared/ErrorAlert';
+import Input from '../shared/Input';
+
+function friendlyError(err) {
+  const status = err?.response?.status;
+  const data = err?.response?.data;
+  if (status === 401) return 'Invalid email or password.';
+  if (status === 422 && data?.errors) {
+    const first = Object.values(data.errors)[0];
+    return Array.isArray(first) ? first[0] : String(first);
+  }
+  if (data?.message) return data.message;
+  return 'Login failed. Please check your connection and try again.';
+}
 
 export default function Login() {
-  const { user, loading, login, authError } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [searchParams] = useSearchParams();
-  const location = useLocation();
 
-  if (!loading && user) {
-    const from = location.state?.from?.pathname || '/';
-    return <Navigate to={from} replace />;
+  if (isAuthenticated) {
+    const from = location.state?.from || '/';
+    navigate(from, { replace: true });
+    return null;
   }
+
+  const validate = () => {
+    const next = {};
+    if (!email.trim()) next.email = 'Email is required.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      next.email = 'Enter a valid email address.';
+    if (!password) next.password = 'Password is required.';
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError('');
+    if (!validate()) return;
     setSubmitting(true);
-    setErrors(null);
-    const res = await login(email.trim(), password);
-    setSubmitting(false);
-    if (!res.ok) setErrors(res.errors);
+    try {
+      await login(email.trim(), password);
+      const from = location.state?.from || '/';
+      navigate(from, { replace: true });
+    } catch (err) {
+      setServerError(friendlyError(err));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  const canSubmit = email.trim() !== '' && password !== '' && !submitting;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-charcoal-950 px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/15 text-3xl ring-1 ring-gold/40">
-            🏢
-          </div>
-          <h1 className="text-2xl font-bold text-slate-100">APRMS</h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Ahmed Property & Rental Management System
+    <div className="flex min-h-screen items-center justify-center bg-charcoal-900 px-4">
+      <div className="glass w-full max-w-md rounded-2xl p-8 shadow-2xl">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold tracking-wide text-gold">APRMS</h1>
+          <p className="mt-2 text-sm text-gray-400">
+            Ahmed Property &amp; Rental Management System
           </p>
-          <p className="mt-0.5 text-xs italic text-gold/80">“Ahmed — Own Every Square Foot.”</p>
+          <p className="mt-1 text-xs text-copper-light">
+            Ahmed — Own Every Square Foot.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="aprms-card space-y-4" noValidate>
-          {searchParams.get('expired') && (
-            <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
-              Your session expired. Please sign in again.
-            </p>
-          )}
-          {authError && (
-            <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
-              {authError}
-            </p>
-          )}
+        <form onSubmit={handleSubmit} noValidate>
+          <ErrorAlert message={serverError} className="mb-4" />
 
-          <div>
-            <label htmlFor="email" className="aprms-label">Email</label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="username"
-              className="aprms-input"
-              placeholder="you@agency.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            {errors?.email && <p className="aprms-error">{errors.email[0]}</p>}
-          </div>
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={errors.email}
+            className="mb-4"
+          />
 
-          <div>
-            <label htmlFor="password" className="aprms-label">Password</label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              className="aprms-input"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            {errors?.password && <p className="aprms-error">{errors.password[0]}</p>}
-          </div>
+          <Input
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={errors.password}
+            className="mb-6"
+          />
 
-          <button type="submit" className="aprms-btn-gold w-full" disabled={submitting}>
-            {submitting ? <Spinner label="Signing in…" /> : 'Sign in'}
-          </button>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className="w-full"
+            disabled={!canSubmit}
+          >
+            {submitting ? 'Signing in…' : 'Sign in'}
+          </Button>
         </form>
 
-        <p className="mt-6 text-center text-[11px] text-slate-600">Developed by Ahmed</p>
+        <p className="mt-8 text-center text-xs text-gray-600">
+          Developed by Ahmed
+        </p>
       </div>
     </div>
   );

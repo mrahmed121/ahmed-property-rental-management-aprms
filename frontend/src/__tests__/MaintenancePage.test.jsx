@@ -6,10 +6,26 @@ import MaintenanceDashboardPage from '../modules/maintenance/pages/MaintenanceDa
 import { AuthProvider } from '../context/AuthContext';
 import api from '../services/api';
 
+const { mockGet, mockPost, mockPut, mockDelete } = vi.hoisted(() => ({
+  mockGet: vi.fn(),
+  mockPost: vi.fn(),
+  mockPut: vi.fn(),
+  mockDelete: vi.fn(),
+}));
+
 vi.mock('../services/api', () => ({
-  default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
+  default: { get: mockGet, post: mockPost, put: mockPut, delete: mockDelete },
   getToken: () => 'test-token',
   setToken: vi.fn(),
+  clearAuth: vi.fn(),
+}));
+
+vi.mock('../api/client', () => ({
+  default: { get: mockGet, post: mockPost, put: mockPut, delete: mockDelete },
+  getToken: () => 'test-token',
+  setToken: vi.fn(),
+  clearAuth: vi.fn(),
+  TOKEN_KEY: 'aprms_token',
 }));
 
 const ADMIN = {
@@ -18,8 +34,8 @@ const ADMIN = {
 };
 
 function mockApi(overrides = {}) {
-  api.get.mockImplementation((url) => {
-    if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+  mockGet.mockImplementation((url) => {
+    if (url === '/auth/me') return Promise.resolve({ data: { data: ADMIN } });
     if (overrides[url]) return Promise.resolve(overrides[url]);
     return Promise.reject(new Error(`unexpected GET ${url}`));
   });

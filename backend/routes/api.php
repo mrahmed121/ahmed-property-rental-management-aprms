@@ -47,7 +47,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::post('auth/refresh', [AuthController::class, 'refresh']);
-        Route::get('me', [AuthController::class, 'me']);
+        Route::get('auth/me', [AuthController::class, 'me']);
 
         // Users & roles
         Route::get('users', [UserController::class, 'index'])->middleware('permission:users.view');

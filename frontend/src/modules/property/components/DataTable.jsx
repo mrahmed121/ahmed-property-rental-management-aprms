@@ -15,6 +15,7 @@ export default function DataTable({
   emptyHint,
   emptyAction,
   onPage,
+  onRetry,
 }) {
   if (loading) {
     return (
@@ -29,6 +30,11 @@ export default function DataTable({
       <div className="aprms-card py-12 text-center">
         <p className="text-base font-semibold text-red-300">Could not load data</p>
         <p className="mt-1 text-sm text-slate-400">{error}</p>
+        {onRetry && (
+          <button onClick={onRetry} className="aprms-btn-ghost mt-4">
+            Retry
+          </button>
+        )}
       </div>
     );
   }

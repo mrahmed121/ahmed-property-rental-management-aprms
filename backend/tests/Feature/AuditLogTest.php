@@ -30,7 +30,7 @@ class AuditLogTest extends TestCase
     {
         $token = $this->loginAs('admin@ahmedestates.local');
 
-        $me = $this->getJson('/api/v1/me', $this->bearer($token))->json('data');
+        $me = $this->getJson('/api/v1/auth/me', $this->bearer($token))->json('data');
 
         $this->putJson("/api/v1/users/{$me['id']}", [
             'phone' => '+92-300-0000001',

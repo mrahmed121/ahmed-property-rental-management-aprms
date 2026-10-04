@@ -3,16 +3,31 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
+const { mockGet, mockPost, mockPut, mockDelete } = vi.hoisted(() => ({
+  mockGet: vi.fn(),
+  mockPost: vi.fn(),
+  mockPut: vi.fn(),
+  mockDelete: vi.fn(),
+}));
+
 vi.mock('../services/api', () => {
-  const get = vi.fn();
-  const post = vi.fn();
-  const put = vi.fn();
-  const del = vi.fn();
   const interceptors = { request: { use: vi.fn() }, response: { use: vi.fn() } };
   return {
-    default: { get, post, put, delete: del, interceptors },
+    default: { get: mockGet, post: mockPost, put: mockPut, delete: mockDelete, interceptors },
     getToken: vi.fn(() => 'fake-token'),
     setToken: vi.fn(),
+    clearAuth: vi.fn(),
+  };
+});
+
+vi.mock('../api/client', () => {
+  const interceptors = { request: { use: vi.fn() }, response: { use: vi.fn() } };
+  return {
+    default: { get: mockGet, post: mockPost, put: mockPut, delete: mockDelete, interceptors },
+    getToken: vi.fn(() => 'fake-token'),
+    setToken: vi.fn(),
+    clearAuth: vi.fn(),
+    TOKEN_KEY: 'aprms_token',
   };
 });
 
@@ -38,8 +53,8 @@ const VIEWER = {
 };
 
 function mockMe(user = ADMIN) {
-  api.get.mockImplementation((url) => {
-    if (url === '/me') return Promise.resolve({ data: { data: user } });
+  mockGet.mockImplementation((url) => {
+    if (url === '/auth/me') return Promise.resolve({ data: { user } });
     return Promise.reject(new Error(`unexpected GET ${url}`));
   });
 }
@@ -78,8 +93,8 @@ describe('Properties list', () => {
   });
 
   it('renders properties from the API', async () => {
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/properties') return Promise.resolve(PROPS_PAGE);
       return Promise.reject(new Error(`unexpected GET ${url}`));
     });
@@ -94,8 +109,8 @@ describe('Properties list', () => {
   });
 
   it('shows an honest empty state when there are no properties', async () => {
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/properties')
         return Promise.resolve({ data: { data: [], meta: { current_page: 1, per_page: 12, total: 0 } } });
       return Promise.reject(new Error(`unexpected GET ${url}`));
@@ -110,8 +125,8 @@ describe('Properties list', () => {
 
   it('hides management actions from read-only roles', async () => {
     mockMe(VIEWER);
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: VIEWER } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: VIEWER } });
       if (url === '/properties') return Promise.resolve(PROPS_PAGE);
       return Promise.reject(new Error(`unexpected GET ${url}`));
     });
@@ -127,8 +142,8 @@ describe('Properties list', () => {
 
   it('shows a forbidden notice without properties.view', async () => {
     const noAccess = { ...ADMIN, permissions: ['dashboard.view'] };
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: noAccess } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { data: noAccess } });
       return Promise.reject(new Error(`unexpected GET ${url}`));
     });
 
@@ -149,16 +164,16 @@ describe('Create property', () => {
 
   it('submits the form and navigates to the new property', async () => {
     const user = userEvent.setup();
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       return Promise.reject(new Error(`unexpected GET ${url}`));
     });
-    api.post.mockResolvedValueOnce({
+    mockPost.mockResolvedValueOnce({
       data: { data: { id: 99, name: 'Test Plaza', property_type: 'commercial', city: 'Karachi', status: 'active', buildings: [] } },
     });
     // Detail page load after navigation.
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/properties/99')
         return Promise.resolve({ data: { data: { id: 99, name: 'Test Plaza', property_type: 'commercial', address: '1 Test Rd', city: 'Karachi', status: 'active', buildings: [] } } });
       if (url === '/buildings') return Promise.resolve({ data: { data: [], meta: {} } });
@@ -189,7 +204,7 @@ describe('Create property', () => {
 
   it('shows inline validation errors from the API', async () => {
     const user = userEvent.setup();
-    api.post.mockRejectedValueOnce({
+    mockPost.mockRejectedValueOnce({
       response: { data: { message: 'Validation failed.', errors: { name: ['The name field is required.'] } } },
     });
 
@@ -228,8 +243,8 @@ describe('Property detail', () => {
 
   it('renders the detail page with tab navigation', async () => {
     const user = userEvent.setup();
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/properties/1') return Promise.resolve(DETAIL);
       if (url === '/buildings') return Promise.resolve({ data: { data: [{ id: 1, name: 'Block A', floors: 5, status: 'active', units_count: 4 }], meta: {} } });
       if (url === '/units') return Promise.resolve({ data: { data: [], meta: { current_page: 1, per_page: 12, total: 0 } } });
@@ -260,8 +275,8 @@ describe('Dashboard stats', () => {
   });
 
   it('renders real query-backed numbers', async () => {
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/dashboard/stats')
         return Promise.resolve({
           data: {
@@ -291,8 +306,8 @@ describe('Dashboard stats', () => {
   });
 
   it('shows an honest empty state with zero properties', async () => {
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/dashboard/stats')
         return Promise.resolve({
           data: { data: { total_properties: 0, total_buildings: 0, total_units: 0, vacant_units: 0, occupied_units: 0, units_by_status: {} } },
@@ -309,7 +324,7 @@ describe('Dashboard stats', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('No property data yet')).toBeInTheDocument();
+      expect(screen.getByText('No data yet')).toBeInTheDocument();
     });
   });
 });

@@ -3,16 +3,31 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
+const { mockGet, mockPost, mockPut, mockDelete } = vi.hoisted(() => ({
+  mockGet: vi.fn(),
+  mockPost: vi.fn(),
+  mockPut: vi.fn(),
+  mockDelete: vi.fn(),
+}));
+
 vi.mock('../services/api', () => {
-  const get = vi.fn();
-  const post = vi.fn();
-  const put = vi.fn();
-  const del = vi.fn();
   const interceptors = { request: { use: vi.fn() }, response: { use: vi.fn() } };
   return {
-    default: { get, post, put, delete: del, interceptors },
+    default: { get: mockGet, post: mockPost, put: mockPut, delete: mockDelete, interceptors },
     getToken: vi.fn(() => 'token'),
     setToken: vi.fn(),
+    clearAuth: vi.fn(),
+  };
+});
+
+vi.mock('../api/client', () => {
+  const interceptors = { request: { use: vi.fn() }, response: { use: vi.fn() } };
+  return {
+    default: { get: mockGet, post: mockPost, put: mockPut, delete: mockDelete, interceptors },
+    getToken: vi.fn(() => 'token'),
+    setToken: vi.fn(),
+    clearAuth: vi.fn(),
+    TOKEN_KEY: 'aprms_token',
   };
 });
 
@@ -26,14 +41,14 @@ import Dashboard from '../pages/Dashboard';
 
 const ADMIN = {
   id: 1, name: 'Admin', email: 'admin@x.local',
-  permissions: ['tenants.view', 'tenants.manage', 'applications.view', 'applications.manage',
+  permissions: ['dashboard.view', 'tenants.view', 'tenants.manage', 'applications.view', 'applications.manage',
     'screening.view', 'screening.manage', 'leases.view', 'leases.manage',
     'inspections.view', 'inspections.manage', 'documents.view', 'documents.manage'],
 };
 
 function mockMe(user = ADMIN) {
-  api.get.mockImplementation((url) => {
-    if (url === '/me') return Promise.resolve({ data: { data: user } });
+  mockGet.mockImplementation((url) => {
+    if (url === '/auth/me') return Promise.resolve({ data: { user } });
     return Promise.reject(new Error(`unexpected GET ${url}`));
   });
 }
@@ -117,8 +132,8 @@ describe('Tenants list', () => {
     vi.clearAllMocks();
     localStorage.clear();
     mockMe();
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/tenants') return Promise.resolve(TENANTS_PAGE);
       return Promise.reject(new Error(`unexpected GET ${url}`));
     });
@@ -134,8 +149,8 @@ describe('Tenants list', () => {
 
   it('hides management actions without tenants.manage', async () => {
     const viewer = { ...ADMIN, permissions: ['tenants.view'] };
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: viewer } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: viewer } });
       if (url === '/tenants') return Promise.resolve(TENANTS_PAGE);
       return Promise.reject(new Error(`unexpected GET ${url}`));
     });
@@ -149,8 +164,8 @@ describe('Leases list', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/leases') return Promise.resolve(LEASES_PAGE);
       return Promise.reject(new Error(`unexpected GET ${url}`));
     });
@@ -167,14 +182,14 @@ describe('Lease detail', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/leases/2') return Promise.resolve(DRAFT_LEASE);
       if (url === '/leases/1') return Promise.resolve(ACTIVE_LEASE);
       if (url === '/documents') return Promise.resolve({ data: { data: [], meta: { total: 0 } } });
       return Promise.reject(new Error(`unexpected GET ${url}`));
     });
-    api.post.mockResolvedValue({ data: { data: {} } });
+    mockPost.mockResolvedValue({ data: { data: {} } });
   });
 
   it('shows Activate for a draft lease and calls the API', async () => {
@@ -202,12 +217,12 @@ describe('Application review', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/applications/5') return Promise.resolve(UNDER_REVIEW_APP);
       return Promise.reject(new Error(`unexpected GET ${url}`));
     });
-    api.post.mockResolvedValue({ data: { data: {} } });
+    mockPost.mockResolvedValue({ data: { data: {} } });
   });
 
   it('renders the workflow and advances under_review to screening', async () => {
@@ -227,8 +242,8 @@ describe('Dashboard leasing metrics', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    api.get.mockImplementation((url) => {
-      if (url === '/me') return Promise.resolve({ data: { data: ADMIN } });
+    mockGet.mockImplementation((url) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: ADMIN } });
       if (url === '/dashboard/stats') {
         return Promise.resolve({
           data: {

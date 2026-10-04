@@ -42,7 +42,8 @@ class PropertyService extends DomainService
 
     public function find(int $id): Property
     {
-        $query = Property::with(['owner:id,name,email', 'buildings', 'units']);
+        $query = Property::with(['owner:id,name,email', 'buildings', 'units'])
+            ->withCount(['buildings', 'units']);
         PropertyAccess::applyToPropertyQuery($query, $this->actor());
 
         return $query->findOrFail($id); // 404 — never leaks existence

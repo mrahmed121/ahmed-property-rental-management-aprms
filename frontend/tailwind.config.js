@@ -4,12 +4,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        // APRMS executive design system — charcoal + Ahmed gold signature + copper
+        // APRMS executive identity — charcoal base, Ahmed gold, copper
         charcoal: {
-          950: '#12161d',
-          900: '#1a2029',
-          800: '#232c38',
-          700: '#2f3a49',
+          950: '#0b0e13',
+          900: '#12161d',
+          800: '#1a2029',
+          700: '#232b37',
+          600: '#2f3947',
         },
         gold: {
           DEFAULT: '#d4af37',
@@ -19,6 +20,7 @@ export default {
         copper: {
           DEFAULT: '#b87333',
           light: '#d19a5f',
+          dark: '#8f5a26',
         },
       },
       fontFamily: {

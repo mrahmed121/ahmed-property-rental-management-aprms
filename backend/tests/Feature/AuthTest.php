@@ -48,14 +48,14 @@ class AuthTest extends TestCase
 
     public function test_protected_route_without_token_returns_401(): void
     {
-        $this->getJson('/api/v1/me')->assertUnauthorized();
+        $this->getJson('/api/v1/auth/me')->assertUnauthorized();
     }
 
     public function test_me_with_valid_token_returns_current_user(): void
     {
         $token = $this->loginAs('manager@ahmedestates.local');
 
-        $this->getJson('/api/v1/me', $this->bearer($token))
+        $this->getJson('/api/v1/auth/me', $this->bearer($token))
             ->assertOk()
             ->assertJsonPath('data.email', 'manager@ahmedestates.local')
             ->assertJsonPath('data.agency.name', 'Ahmed Estates');
@@ -68,7 +68,7 @@ class AuthTest extends TestCase
         $this->postJson('/api/v1/auth/logout', [], $this->bearer($token))->assertOk();
 
         // Reusing the token must now fail.
-        $this->getJson('/api/v1/me', $this->bearer($token))->assertUnauthorized();
+        $this->getJson('/api/v1/auth/me', $this->bearer($token))->assertUnauthorized();
     }
 
     public function test_successful_login_creates_audit_entry(): void

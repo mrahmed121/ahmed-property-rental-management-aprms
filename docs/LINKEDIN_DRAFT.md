@@ -22,7 +22,7 @@ The engineering I'm proudest of: a single tenant ledger that rent, utilities, an
 
 Verified, not claimed: 211 backend tests (1,349 assertions) and 49 frontend tests, all passing. Live end-to-end flows tested against a real server.
 
-GitHub: [ADD FINAL GITHUB REPOSITORY LINK AFTER PUBLISHING]
+GitHub: https://github.com/mrahmed121/ahmed-property-rental-management-aprms
 
 #PropertyManagement #Laravel #React #PHP #SoftwareEngineering #RealEstate #FinTech
 

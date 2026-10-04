@@ -33,7 +33,7 @@ class BuildingService extends DomainService
 
     public function find(int $id): Building
     {
-        $query = Building::with(['property', 'units']);
+        $query = Building::with(['property', 'units'])->withCount('units');
         PropertyAccess::applyToPropertyQuery($query, $this->actor(), 'property_id');
 
         return $query->findOrFail($id);

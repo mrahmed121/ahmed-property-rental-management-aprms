@@ -42,3 +42,6 @@ Thumbs.db
 *.log
 npm-debug.log*
 .cache/
+
+# --- Root node_modules (accidentally tracked, removed 2026-10-04) ---
+/node_modules/

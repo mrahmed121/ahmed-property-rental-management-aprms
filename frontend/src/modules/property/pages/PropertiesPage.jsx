@@ -87,7 +87,14 @@ export default function PropertiesPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-slate-100">Properties</h2>
-            <p className="mt-1 text-sm text-slate-400">Your agency's property portfolio.</p>
+            <p className="mt-1 text-sm text-slate-400">
+              Your agency's property portfolio.
+              {meta?.total != null && (
+                <span className="ml-2 text-slate-500">
+                  {meta.total} {meta.total === 1 ? 'property' : 'properties'} in portfolio
+                </span>
+              )}
+            </p>
           </div>
           {canManage && (
             <Link to="/properties/new" className="aprms-btn-gold">
@@ -156,6 +163,13 @@ export default function PropertiesPage() {
             { key: 'property_type', label: 'Type', render: (r) => <StatusBadge value={r.property_type} /> },
             { key: 'city', label: 'City' },
             {
+              key: 'owner',
+              label: 'Owner',
+              render: (r) => (
+                <span className="text-slate-300">{r.owner?.name || <span className="text-slate-500">—</span>}</span>
+              ),
+            },
+            {
               key: 'portfolio',
               label: 'Portfolio',
               render: (r) => (
@@ -203,6 +217,7 @@ export default function PropertiesPage() {
             ) : undefined
           }
           onPage={(page) => setFilter({ page })}
+          onRetry={load}
         />
 
         <ConfirmDialog
