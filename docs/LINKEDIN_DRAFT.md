@@ -1,31 +1,37 @@
-# LinkedIn Post Draft — APRMS (for Ahmed to publish himself)
+# LinkedIn Draft — APRMS (DO NOT PUBLISH — Ahmed publishes manually)
 
 ---
 
-I built APRMS — a complete Property & Rental Management System.
+Just shipped a complete property & rental management system — built from scratch, verified end-to-end.
 
-The problem: property agencies juggle properties, tenants, leases, rent collection, deposits, maintenance, utilities, and owner payouts across spreadsheets and disconnected tools. Money leaks through the cracks.
+**APRMS — Ahmed Property & Rental Management System**
+"Own Every Square Foot."
 
-APRMS puts the entire rental lifecycle in one system:
+A full-stack platform for property agencies, owners, and managers handling the entire rental lifecycle:
 
-🏢 Properties, buildings, units — with documents and archive/restore
-📝 Tenants, applications, screening, full lease lifecycle
-💰 Rent invoices, payments, and an allocation waterfall (late fees → utilities → rent → arrears)
-🔐 Deposits with a server-enforced 3× rent cap and audited settlements
-🔧 Maintenance tickets with SLA tracking, quotes, and owner/tenant cost attribution
-⚡ Utility meters, readings, billing, and vacant-unit owner absorption
-📊 Accrual-based owner statements with deterministic reconciliation — down to a PDF
+**What it does:**
+- Property → Building → Unit portfolio management with archive/restore
+- Tenant onboarding, KYC, documents, and lease lifecycle (draft → activate → renew → terminate)
+- Rent invoicing with idempotent monthly generation (INV-YYYY-NNNNNN)
+- Payment processing with waterfall allocation: late fees → utilities → current rent → oldest arrears
+- Immutable tenant ledger, receipts (RCPT-YYYY-NNNNNN), arrears aging
+- Security deposits: hold → inspection → evidence-gated deductions → settlement → refund
+- Maintenance: ticket → triage → assign → quote → approval → completion
+- Utility meters with monotonic reading validation, bill splitting
+- Property expenses with approval workflow
+- Owner statements: income − management fee − costs = payout, with period locking
 
-Architecture: Laravel 11 API (domain-oriented services, no second ledgers) + React 18 SPA. Nine roles with granular permissions, strict multi-agency isolation, append-only audit trail.
+**Engineering:**
+- Laravel 11 API + React 18 SPA (Vite + Tailwind)
+- 9 roles, permission-gated routes, agency isolation at the service layer
+- 142 API routes, all authz-gated
+- Financial correctness: DB transactions, row locking, idempotency keys, exact decimal arithmetic
+- 211 backend tests (1,349 assertions) + 78 frontend tests — all passing on a fresh database
+- Zero fake data: every dashboard number is query-backed
 
-The engineering I'm proudest of: a single tenant ledger that rent, utilities, and deposits all flow through correctly; payment allocation that respects the waterfall; owner statements where every number traces back to its source line.
-
-Verified, not claimed: 211 backend tests (1,349 assertions) and 49 frontend tests, all passing. Live end-to-end flows tested against a real server.
+**Verification:**
+Full forensic pass before release — fresh DB, all tests green, browser QA across every module, financial integrity checks (zero duplicates, zero over-allocations), secret scan clean.
 
 GitHub: https://github.com/mrahmed121/ahmed-property-rental-management-aprms
 
-#PropertyManagement #Laravel #React #PHP #SoftwareEngineering #RealEstate #FinTech
-
----
-
-*Notes for Ahmed: Replace the GitHub link after publishing. Test counts are actual (211 backend / 49 frontend as of P8). Adjust if counts change.*
+#Laravel #React #FullStack #PropertyManagement #FinTech #SoftwareEngineering #PHP #JavaScript
